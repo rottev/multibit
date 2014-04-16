@@ -40,6 +40,8 @@ import org.multibit.viewsystem.swing.view.panels.SendBitcoinPanel;
 import org.multibit.viewsystem.swing.view.panels.ShowPreferencesPanel;
 import org.multibit.viewsystem.swing.view.panels.ShowTransactionsPanel;
 import org.multibit.viewsystem.swing.view.panels.SignMessagePanel;
+import org.multibit.viewsystem.swing.view.panels.TradeingPanel;
+import org.multibit.viewsystem.swing.view.panels.TradingPanel;
 import org.multibit.viewsystem.swing.view.panels.VerifyMessagePanel;
 import org.multibit.viewsystem.swing.view.panels.WelcomePanel;
 
@@ -182,6 +184,11 @@ public class ViewFactory {
         case CHARTS_VIEW: {
             viewToReturn = new ChartsPanel(this.bitcoinController, mainFrame);
             break;
+        }
+        
+        case TRADING_VIEW: {
+        	 viewToReturn = new TradeingPanel(this.bitcoinController, mainFrame);
+             break;
         }
 
         default: {

@@ -111,8 +111,8 @@ public class ExportTransactionsSubmitActionTest extends TestCase {
         assertEquals("Header row incorrect", "Date,Description,Amount (BTC),Amount (\u20AC),Transaction Id", line0);
 
         // Note \u5317\u4EAC = Beijing in Chinese.
-        String row1Expected =  "29 Jul 2013 10:23,\"Sent to \"\"unencrypted-1-\u5317\u4EAC\"\" (1CQH7Hp9nNQVDcKtFVwbA8tqPMNWDBvqE3)\",-0.015,-0.15,28916ed8592a4cf216d8eac7e5ccb5a08771f439e508ec2861b7ff612e15b827";
-        String row2Expected = "29 Jul 2013 10:00,\"Received with \"\"protobuf 1.1.\u5317\u4EAC\"\" (1GtMdodCNN5ewFcEUxxVBziBrLtQzSuZvq)\",0.015,0.15,5eeabb42d0522c40cc63dace7746d5f82cd51292bc50a38c4dd68a854ec6cd77";
+        String row1Expected =  "29 Jul 2013 12:23,\"Sent to \"\"unencrypted-1-\u5317\u4EAC\"\" (1CQH7Hp9nNQVDcKtFVwbA8tqPMNWDBvqE3)\",-0.015,-0.15,28916ed8592a4cf216d8eac7e5ccb5a08771f439e508ec2861b7ff612e15b827";
+        String row2Expected = "29 Jul 2013 12:00,\"Received with \"\"protobuf 1.1.\u5317\u4EAC\"\" (1GtMdodCNN5ewFcEUxxVBziBrLtQzSuZvq)\",0.015,0.15,5eeabb42d0522c40cc63dace7746d5f82cd51292bc50a38c4dd68a854ec6cd77";
         assertEquals("Row 1 incorrect", row1Expected, line1);
         assertEquals("Row 2 incorrect", row2Expected, line2);
     }

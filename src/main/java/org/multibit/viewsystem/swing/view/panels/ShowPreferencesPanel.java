@@ -45,6 +45,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -116,6 +119,9 @@ public class ShowPreferencesPanel extends JPanel implements Viewable, Preference
     private boolean originalShowAsk;
     private boolean originalShowExchange;
 
+    private boolean originalIsTestnet;
+    private JCheckBox IsTest;
+    
     private JCheckBox showTicker;
     private JCheckBox showBitcoinConvertedToFiat;
 
@@ -319,6 +325,15 @@ public class ShowPreferencesPanel extends JPanel implements Viewable, Preference
         constraints.weighty = 1.6;
         constraints.anchor = GridBagConstraints.ABOVE_BASELINE_LEADING;
         mainPanel.add(createBrowserIntegrationPanel(stentWidth), constraints);
+        
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.gridx = 0;
+        constraints.gridy = 5;
+        constraints.gridwidth = 2;
+        constraints.weightx = 1;
+        constraints.weighty = 1.6;
+        constraints.anchor = GridBagConstraints.ABOVE_BASELINE_LEADING;
+        mainPanel.add(createConfigurationSettingsPanel(stentWidth), constraints);
 
         JLabel filler1 = new JLabel();
         filler1.setOpaque(false);
@@ -1462,6 +1477,43 @@ public class ShowPreferencesPanel extends JPanel implements Viewable, Preference
 
         return browserIntegrationPanel;
     }
+    
+    private JPanel createConfigurationSettingsPanel(int stentWidth) {
+        MultiBitTitledPanel configurationSettingsPanel = new MultiBitTitledPanel(controller.getLocaliser().getString(
+                "showPreferencesPanel.browserIntegrationTitle"), ComponentOrientation.getOrientation(controller.getLocaliser()
+                .getLocale()));
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        originalIsTestnet = BitcoinModel.TESTNET3_VALUE.toString().equals(controller.getModel().getUserPreference(BitcoinModel.TEST_OR_PRODUCTION_NETWORK));
+        
+        IsTest = new JCheckBox(controller.getLocaliser().getString("showPreferencesPanel.configurationSection.NetworkMode"));
+        IsTest.setOpaque(false);
+        IsTest.setFont(FontSizer.INSTANCE.getAdjustedDefaultFont());
+        IsTest.setSelected(originalIsTestnet);
+    
+        IsTest.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				// TODO Auto-generated method stub
+				controller.getModel().setUserPreference(BitcoinModel.TEST_OR_PRODUCTION_NETWORK, IsTest.isSelected() ? BitcoinModel.TESTNET3_VALUE : BitcoinModel.PRODUCTION_NETWORK_VALUE);
+
+				
+			}
+		});
+        
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.gridx = 1;
+        constraints.gridy = 4;
+        constraints.weightx = 0.2;
+        constraints.weighty = 0.3;
+        constraints.gridwidth = 4;
+        constraints.anchor = GridBagConstraints.LINE_START;
+        
+        configurationSettingsPanel.add(IsTest, constraints);
+
+        return configurationSettingsPanel;
+    }
 
     private JPanel createButtonPanel() {
         JPanel buttonPanel = new JPanel();
@@ -1903,6 +1955,13 @@ public class ShowPreferencesPanel extends JPanel implements Viewable, Preference
     public boolean getPreviousShowTicker() {
         return originalShowTicker;
     }
+    
+    @Override
+    public boolean getPreviousTestnet() {
+        return originalIsTestnet;
+    }
+    
+    
 
     @Override
     public boolean getNewShowTicker() {

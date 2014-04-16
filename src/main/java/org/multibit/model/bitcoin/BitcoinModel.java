@@ -704,6 +704,11 @@ public class BitcoinModel extends AbstractModel<CoreModel> {
             return NetworkParameters.prodNet();
         }
     }
+    
+    public void setNetworkParameters(boolean Testnet)
+    {
+    	super.setUserPreference(BitcoinModel.TEST_OR_PRODUCTION_NETWORK, Testnet ? BitcoinModel.TESTNET3_VALUE : BitcoinModel.PRODUCTION_NETWORK_VALUE);
+    }
 
     public boolean thereIsNoActiveWallet() {
         return activeWalletModelData == null

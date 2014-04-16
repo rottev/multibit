@@ -46,6 +46,7 @@ public class ReceiveBitcoinPanel extends AbstractTradePanel implements Viewable 
     private static final long serialVersionUID = -2065108865497842662L;
 
     private CreateNewReceivingAddressAction createNewReceivingAddressAction;
+    private CreateNewColoredReceivingAddressAction createNewColoredReceivingAddressAction;
 
     public ReceiveBitcoinPanel(BitcoinController bitcoinController, MultiBitFrame mainFrame) {
         super(mainFrame, bitcoinController);
@@ -61,6 +62,9 @@ public class ReceiveBitcoinPanel extends AbstractTradePanel implements Viewable 
         createNewReceivingAddressAction = new CreateNewReceivingAddressAction(super.bitcoinController, mainFrame, this);
         return createNewReceivingAddressAction;
     }
+    
+
+   
     
     @Override
     protected Action getDeleteAddressAction() {

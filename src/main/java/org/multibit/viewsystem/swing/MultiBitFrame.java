@@ -395,6 +395,13 @@ public class MultiBitFrame extends JFrame implements ViewSystem, ApplicationList
         viewTabbedPane.addTab(transactionsView.getViewTitle(), transactionsView.getViewIcon(), transactionsView.getViewTooltip(),
                 transactionsOutlinePanel);
         
+        // Add the trading tab
+        JPanel tradingOutlinePanel = new JPanel(new BorderLayout());
+        Viewable tradingView = viewFactory.getView(View.TRADING_VIEW);
+        tradingOutlinePanel.add((JPanel) tradingView, BorderLayout.CENTER);
+        viewTabbedPane.addTab(tradingView.getViewTitle(), tradingView.getViewIcon(), tradingView.getViewTooltip(),
+        		tradingOutlinePanel);
+        
         if (initialView == View.SEND_BITCOIN_VIEW) {
             viewTabbedPane.setSelectedIndex(0);
         } else if (initialView == View.RECEIVE_BITCOIN_VIEW) {

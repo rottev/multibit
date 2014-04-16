@@ -34,10 +34,12 @@ package org.multibit.viewsystem.swing;
  */
 
 import com.google.bitcoin.core.Block;
+
 import org.multibit.controller.Controller;
 import org.multibit.controller.bitcoin.BitcoinController;
 import org.multibit.message.Message;
 import org.multibit.message.MessageListener;
+import org.multibit.model.bitcoin.BitcoinModel;
 import org.multibit.model.core.StatusEnum;
 import org.multibit.viewsystem.swing.action.MultiBitAction;
 import org.multibit.viewsystem.swing.view.components.BlinkLabel;
@@ -53,6 +55,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.UIResource;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -151,13 +154,26 @@ public class StatusBar extends JPanel implements MessageListener {
               if (finalController.getMultiBitService().getPeerGroup() != null && finalController.getMultiBitService().getPeerGroup().getConnectedPeers() != null) {
                 numberOfPeers = finalController.getMultiBitService().getPeerGroup().getConnectedPeers().size();
               }
+              if(BitcoinModel.TESTNET3_VALUE.toString().equals(controller.getModel().getUserPreference(BitcoinModel.TEST_OR_PRODUCTION_NETWORK))) {
+             
               onlineLabel.setToolTipText(HelpContentsPanel.createMultilineTooltipText(new String[]{
-                      finalController.getLocaliser().getString("multiBitFrame.numberOfBlocks",
+                      finalController.getLocaliser().getString("multiBitFrame.tesnet"),
+            		  finalController.getLocaliser().getString("multiBitFrame.numberOfBlocks",
                               new Object[]{blockHeight}),
                       finalController.getLocaliser().getString("multiBitFrame.blockDate",
                               new Object[]{dateFormatter.format(blockTime)}),
                       finalController.getLocaliser().getString("multiBitFrame.connectedTo",
                               new Object[]{numberOfPeers})}));
+              }
+              else {
+            	  onlineLabel.setToolTipText(HelpContentsPanel.createMultilineTooltipText(new String[]{
+                		  finalController.getLocaliser().getString("multiBitFrame.numberOfBlocks",
+                                  new Object[]{blockHeight}),
+                          finalController.getLocaliser().getString("multiBitFrame.blockDate",
+                                  new Object[]{dateFormatter.format(blockTime)}),
+                          finalController.getLocaliser().getString("multiBitFrame.connectedTo",
+                                  new Object[]{numberOfPeers})}));
+              }
             }
           }
         }

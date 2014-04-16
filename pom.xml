@@ -782,13 +782,22 @@
             <artifactId>jcsv</artifactId>
             <version>1.4.0</version>
         </dependency>
+        
         <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>javafx</artifactId>
-            <version>2.2.40</version>
-            <systemPath>${java.home}/lib/jfxrt.jar</systemPath>
-            <scope>system</scope>
+        	<groupId>com.github.briandilley.jsonrpc4j</groupId>
+        	<artifactId>jsonrpc4j</artifactId>
+        	<version>1.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+		  <groupId>org.apache.httpcomponents</groupId>
+		  <artifactId>fluent-hc</artifactId>
+		  <version>4.2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.4</version>
+		</dependency>
     </dependencies>
 
     <reporting>
