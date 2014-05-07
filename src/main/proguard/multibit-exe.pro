@@ -148,6 +148,24 @@
 -keep public class org.spongycastle.crypto.**
 -keep public class org.spongycastle.math.**
 
+-keep public class org.apache.http.**
+{
+*;
+}
+-keep public class com.google.gson.**
+{
+*;
+}
+-keep public class com.googlecode.jsonrpc4j.**
+{
+*;
+}
+
+-keep public class org.apache.commons.logging.**
+{
+*;
+}
+
 -keep public interface org.slf4j.**
 -keep public interface org.xml.sax.**
 -keep public interface com.xeiam.xchange.**

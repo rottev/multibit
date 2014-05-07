@@ -302,8 +302,11 @@ public class MultiBitService {
     }
     return blockStore;
   }
-
   public void createNewPeerGroup() {
+	  createNewPeerGroup(true);
+  }
+  
+  public void createNewPeerGroup(boolean addWallets) {
     peerGroup = new MultiBitPeerGroup(bitcoinController, networkParameters, blockChain);
     peerGroup.setFastCatchupTimeSecs(0); // genesis block
     peerGroup.setUserAgent("MultiBit", controller.getLocaliser().getVersionNumber());
@@ -356,7 +359,7 @@ public class MultiBitService {
       List<WalletData> perWalletDataModels = bitcoinController.getModel().getPerWalletModelDataList();
       if (perWalletDataModels != null) {
         Iterator<WalletData> iterator = perWalletDataModels.iterator();
-        if (iterator != null) {
+        if (iterator != null && addWallets) {
           while (iterator.hasNext()) {
             WalletData perWalletModelData = iterator.next();
             if (perWalletModelData != null && perWalletModelData.getWallet() != null) {

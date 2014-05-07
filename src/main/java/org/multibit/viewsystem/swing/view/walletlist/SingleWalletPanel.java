@@ -15,12 +15,15 @@
  */
 package org.multibit.viewsystem.swing.view.walletlist;
 
+import com.google.bitcoin.core.PeerGroup;
 import com.google.bitcoin.core.Transaction;
+import com.google.bitcoin.core.TransactionInput;
 import com.google.bitcoin.core.TransactionOutput;
 import com.google.bitcoin.core.Wallet.BalanceType;
 
 import etx.com.trading.BaseTrading;
 import etx.com.trading.BaseTrading.Asset;
+import etx.com.trading.BaseTrading.ColorGenisis;
 
 import org.bitcoinj.wallet.Protos.Wallet.EncryptionType;
 import org.joda.money.Money;
@@ -45,6 +48,10 @@ import org.multibit.viewsystem.swing.view.panels.HelpContentsPanel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+
+
+
+
 
 
 
@@ -679,16 +686,33 @@ public class SingleWalletPanel extends JPanel implements ActionListener, FocusLi
     LinkedList<TransactionOutput> all = perWalletModelData.getWallet().calculateAllSpendCandidates(false);
     System.out.println("transactions count: " + all.size());
     BigInteger value = BigInteger.ZERO;
+    PeerGroup peerGroup = bitcoinController.getMultiBitService().getPeerGroup();
+    
     for (TransactionOutput out : all) 
     {
     	List<TransactionOutput> outi = out.getParentTransaction().getOutputs();
     	System.out.println("output count: " + outi.size());
     	for(int outindex =0;  outindex < outi.size(); outindex ++) {
     		TransactionOutput singleOutput = outi.get(outindex);
+    		System.out.println("Checking index(" + outindex + ")" +" trans: " + singleOutput.getParentTransaction().getHashAsString() );
+    		System.out.println("Mine: " + singleOutput.isMine(perWalletModelData.getWallet()) + " Avilable: " + singleOutput.isAvailableForSpending() + " Color: " +
+    				bt.IsColorTransaction(  singleOutput.getParentTransaction().getHashAsString(), outindex));
+    		
+    		System.out.println("Parent: " + singleOutput.getParentTransaction().getHashAsString() );
+    		System.out.println("inputs: ");
+    		for(TransactionInput in :	out.getParentTransaction().getInputs())
+    			System.out.println(in.getParentTransaction().getHashAsString());
+    		System.out.println("InHashes: ");
+    		
+    		System.out.println(singleOutput.getParentTransaction().getAppearsInHashes());
+    		
+    		//String blockhash = (String) singleOutput.getParentTransaction().getAppearsInHashes().keySet().toArray()[0];
+    		
     		if(singleOutput.isMine(perWalletModelData.getWallet()) && singleOutput.isAvailableForSpending()) {
-		    	if(bt.IsColorTransaction(  singleOutput.getParentTransaction().getHashAsString(), outindex))
+		    	ColorGenisis cg = bt.GetColorTransactionSearchHistory(perWalletModelData.getWallet(), singleOutput.getParentTransaction().getHashAsString(), outindex);
+    			if( cg != null)
 		    	{
-		    		Asset ast = bt.getAssetForTransaction(singleOutput.getParentTransaction().getHashAsString());
+		    		Asset ast = bt.getAssetForTransaction(cg.txout, cg.index);
 		    		if(!coloredValuesLabel.containsKey(ast)) {
 		    			TransLabel bl = new TransLabel(controller, false);
 			    		bl.setBackground(ColorAndFontConstants.BACKGROUND_COLOR);

@@ -27,17 +27,17 @@ import org.multibit.viewsystem.swing.view.components.MultiBitDialog;
 /**
  * This {@link Action} represents an ok action and closes the dialog it is on
  */
-public class OkBackToParentAction extends AbstractAction {
+public class OkAction extends AbstractAction {
 
     private static final long serialVersionUID = 191352235461234705L;
 
     private MultiBitDialog dialog;
 
     /**
-     * Creates a new {@link OkBackToParentAction}.
+     * Creates a new {@link OkAction}.
      */
     
-    public OkBackToParentAction(Controller controller,  MultiBitDialog dialog) {
+    public OkAction(Controller controller,  MultiBitDialog dialog) {
         super(controller.getLocaliser().getString("okBackToParentAction.text"));
         this.dialog = dialog;
 
@@ -47,7 +47,7 @@ public class OkBackToParentAction extends AbstractAction {
         putValue(MNEMONIC_KEY, mnemonicUtil.getMnemonic("okBackToParentAction.mnemonicKey"));
     }
     
-    public OkBackToParentAction(Controller controller, ImageIcon icon,  MultiBitDialog dialog) {
+    public OkAction(Controller controller, ImageIcon icon,  MultiBitDialog dialog) {
         super(controller.getLocaliser().getString("okBackToParentAction.text"), icon);
         this.dialog = dialog;
 
@@ -60,10 +60,15 @@ public class OkBackToParentAction extends AbstractAction {
     /**
      * close the root dialog
      */
-    @Override
-    public void actionPerformed(ActionEvent e) {
+
+    public void close() {
         if (dialog != null) {
             dialog.setVisible(false);
         }
     }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+	}
 }

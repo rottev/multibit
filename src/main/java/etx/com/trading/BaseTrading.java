@@ -8,8 +8,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -17,7 +22,23 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.bitcoin.core.Address;
+import com.google.bitcoin.core.Block;
+import com.google.bitcoin.core.Peer;
+import com.google.bitcoin.core.PeerGroup;
+import com.google.bitcoin.core.ScriptException;
+import com.google.bitcoin.core.Sha256Hash;
+import com.google.bitcoin.core.Transaction;
+import com.google.bitcoin.core.TransactionInput;
+import com.google.bitcoin.core.Wallet;
+import com.google.bitcoin.script.Script;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 
 
@@ -28,6 +49,15 @@ public class BaseTrading {
 	private static List<Asset> assetsList;
 	private static Map<String,Issuance> issuancesList;
 	private static Object lock = new Object();
+	public static int ColorSchemeId = 2;
+	public static final String TRADE_MESSAGE_PROTOCOL_VERSION = "1.0";
+	
+	public static class ColorGenisis
+	{
+		public int index;
+		public String txout;
+	}
+	
 	
 	private static BaseTrading instance = null;
 	
@@ -71,42 +101,33 @@ public class BaseTrading {
 	
 	
 	
+	public static class ProposalInfo
+	{
+		public ProposalInfo parseProposal()
+		{
+			ProposalInfo p = new ProposalInfo();
+			return p;
+		}
+	}
+	
 	public static class Proposal
 	{
-		//offeredOutputs -- output that traces back to a genisis block with a color
-		//quantityOffered -- quantity of the colored asset
-		//requestedAsset -- output of a genisis block for a diffrent asset you want in return 
-       // price -- ratio for how many of theier for one of mine.
-		public String[] offeredOutputs;
-		public double quantityOffered;
-		public String requestedAsset;
-		public double price;
-		
+		public String[] data;
+		public String id;
 		
 		
 		
 		public String[] getColumnNames()
 		{
-			return new String[] {"Offerd", "Quantity", "Requesting", "Ratio"};
+			return new String[] {"Scheme", "Offerd", "Quantity", "Requesting", "Ratio"};
 		}
 
 
 		public String getColumnByInedx(int index) {
 			// TODO Auto-generated method stub
-			switch(index)
-			{
-			case 0:
-				return offeredOutputs[0];
-			case 1:
-				return Double.toString(quantityOffered);
-			case 2:
-				return requestedAsset;
-			case 3:
-				return Double.toString(price);
-			default:
-				return null;
-			}
+				return data[index];
 		}
+		
 	}
 	
 	public static class Asset {
@@ -142,6 +163,7 @@ public class BaseTrading {
 		public String value_sign;
 		public double value_multiplyer;
 		public double satoshi_multiplyier;
+		public String first_issuance_date;
 		
 		
 		public int getColumnCount()
@@ -182,6 +204,7 @@ public class BaseTrading {
 		public int outputindex;
 		public String asssetId;
 		public String units;
+		public String date;
 	}
 	
 	
@@ -245,9 +268,25 @@ public class BaseTrading {
 		
 	}
 	
+	
 	public Map<String, Issuance> getIssuane(){
+		return getIssuane(null);
+	}
+	
+	public Map<String, Issuance> getIssuane(String AssetId ){
 		synchronized (lock) {
-			return issuancesList;
+			if(AssetId == null)
+				return issuancesList;
+			else
+			{
+				Map<String, Issuance> hmap = new HashMap<String, BaseTrading.Issuance>();
+				for(Entry<String, Issuance> sd : issuancesList.entrySet()) {
+					if(AssetId.equals(sd.getValue().asssetId)){
+						hmap.put(sd.getKey(), sd.getValue());
+					}
+				}
+				return hmap;
+			}
 		}
 	}
 	
@@ -278,7 +317,7 @@ public class BaseTrading {
 							Map<String, Issuance> imap = new HashMap<String,Issuance>();
 							for(Issuance i : json)
 							{
-								imap.put(i.geneisistransaction, i);
+								imap.put(i.geneisistransaction + ":" + i.outputindex, i);
 							}
 							//System.out.println(assets.get(0).name);
 							return imap;
@@ -298,19 +337,72 @@ public class BaseTrading {
   // color parts
 	public boolean IsColorTransaction(String txhash, int outIndex)
 	{
-		return getIssuane().containsKey(txhash) && getIssuane().get(txhash).outputindex == outIndex;
+		
+		return getIssuane().containsKey(txhash + ":" + outIndex);
+	}
+	
+	
+	public ColorGenisis GetColorTransactionSearchHistory(Wallet w, final String txhash, final int outIndex)
+	{
+		if(IsColorTransaction(txhash,outIndex ))
+			return new ColorGenisis(){{ index = outIndex; txout = txhash; }};
+		
+		Set<Transaction> trans = w.getTransactions(true);
+		for (Iterator<Transaction> it = trans.iterator(); it.hasNext(); ) {
+			Transaction t = it.next();
+			if(t.getHashAsString().equals(txhash)){
+				for(TransactionInput ins : t.getInputs()){
+				//	try {
+
+						
+						//if(t.getOutput(outIndex).getScriptPubKey().getToAddress(w.getNetworkParameters()).equals(ins.getFromAddress())){
+							trans.remove(t);
+							return DoesTransactionHaveAColor(trans, ins.getOutpoint().getHash().toString(), (int)ins.getOutpoint().getIndex());
+					//	}
+				//	} catch (ScriptException e) {
+						// TODO Auto-generated catch block
+				//		e.printStackTrace();
+				//	}
+					
+				}
+			}
+		}
+		
+		
+		return null;
+	}
+	
+	public int GetColorScheme()
+	{
+		return 2;
+	}
+	
+	private ColorGenisis DoesTransactionHaveAColor(Set<Transaction> trans, final String txhash, final int outIndex)
+	{
+		if(IsColorTransaction(txhash,outIndex ))
+			return new ColorGenisis(){{ index = outIndex; txout = txhash; }};
+		
+		for (Iterator<Transaction> it = trans.iterator(); it.hasNext(); ) {
+			Transaction t = it.next();
+			if(t.getHashAsString().equals(txhash)){
+				for(TransactionInput ins : t.getInputs()){
+					//if(ins.getConnectedOutput() != null && ins.getConnectedOutput().equals(t.getOutput(outIndex))){
+						trans.remove(t);
+						return DoesTransactionHaveAColor(trans, ins.getOutpoint().getHash().toString(), (int)ins.getOutpoint().getIndex());
+					//}
+				}
+			}
+		}
+		return null;
 	}
 
-	public Asset getAssetForTransaction(final String txhash) {
-		// TODO Auto-generated method stub
-		//Asset a = new Asset();
-		//a.id = getIssuane().get(txhash).asssetId;
-		return getAssetList().get(getAssetList().indexOf(new Asset(){{ this.id= getIssuane().get(txhash).asssetId;}} ));
+	public Asset getAssetForTransaction(final String txhash, final int index) {
+		return getAssetList().get(getAssetList().indexOf(new Asset(){{ this.id= getIssuane().get(txhash + ":" + index).asssetId;}} ));
 	}
 	
 	public List<Proposal> getProposals()
 	{
-		List<Proposal> proposals = null;
+		List<Proposal> proposals = new ArrayList<Proposal>();
 		try
 		{
 			 client = new JsonRpcHttpClient(new URL("http://127.0.0.1:6712"));
@@ -323,8 +415,27 @@ public class BaseTrading {
 			  {
 				  if(msg.subject.equals("proposal"))
 				  {
-					  Proposal p = new Gson().fromJson(msg.body,Proposal.class);
-					  proposals.add(p);
+						 JsonParser parser = new JsonParser();
+						 JsonObject o = (JsonObject)parser.parse(msg.body);
+						 if(IsValidProposal(o) ) { // version 1.0 {
+							 
+							 
+							 
+							 Proposal p = new Proposal();
+							 String Scheme = o.get("scheme").toString();
+							 String asset = o.get("give").getAsJsonObject().get("asset").toString();
+							 String quantity = o.get("take").getAsJsonObject().get("quantity").toString();
+							 String assestre = o.get("give").getAsJsonObject().get("asset").toString();
+							 String ratio = o.get("give").getAsJsonObject().get("quantity").toString();
+							 
+							 p.data = new String[] {Scheme, asset, quantity, assestre, ratio };
+							 p.id = UUID.randomUUID().toString();
+							 proposals.add(p);
+							 //String firstHash = o.get("give").getAsJsonObject().get("utxos").getAsJsonArray().get(0).getAsJsonArray().get(0).getAsString();
+							// String txHash = o.get("give").getAsJsonObject().get("utxos").getAsJsonArray().get(0).getAsJsonArray().get(1).getAsString();
+						 }
+					//  Proposal p = new Gson().fromJson(msg.body,Proposal.class);
+					  //proposals.add(p);
 				  }
 			  }
 			  
@@ -341,5 +452,109 @@ public class BaseTrading {
 		}
 	
 		return proposals;
+	}
+	
+	private boolean IsValidProposal(JsonObject o) {
+		// TODO Auto-generated method stub
+		if(!o.has("scheme"))
+			return false;
+		if(o.has("version") && o.get("version").getAsString().equals(TRADE_MESSAGE_PROTOCOL_VERSION))
+			return true;
+		if(!o.has("version"))
+			return true;
+		
+		return false;
+	}
+
+	public boolean addOffer(int Scheme ,String giveAsset, int giveQuantty, String[] giveUtxos, int takeQuantity,
+			String takeAddress, String takeAsset)
+	{
+		 try {
+			client = new JsonRpcHttpClient(new URL("http://127.0.0.1:6712"));	        
+		    
+			Map<String,String> map = client.getHeaders();
+			ObjectMapper om = client.getObjectMapper();
+			final JsonObject o = new JsonObject();
+			JsonObject item = new JsonObject();
+			JsonArray utx = new JsonArray();
+			JsonArray utxos = new JsonArray();
+			item.addProperty(null, giveUtxos[0]);
+			utx.add(item );
+			item = new JsonObject();
+			item.addProperty(null, giveUtxos[0]);
+			utx.add(item );
+			utxos.add(utx);
+			
+			o.addProperty("scheme", Scheme);
+			
+			
+			JsonObject JsonGive = new JsonObject();
+			JsonGive.addProperty("quantity", giveQuantty);
+			JsonGive.addProperty("asset", giveAsset);
+			JsonGive.add("giveUtxos", utxos);
+			JsonGive.addProperty("quantity", giveQuantty);
+			
+			o.add("give", JsonGive);
+			
+			JsonObject JsonTake = new JsonObject();
+			JsonTake.addProperty("quantity", takeQuantity);
+			JsonTake.addProperty("asset", takeAsset);
+			JsonTake.addProperty("address", takeAddress);
+			
+			o.add("take", JsonTake);
+			o.addProperty("version", TRADE_MESSAGE_PROTOCOL_VERSION);
+			
+			//o.add("scheme", Scheme);
+						
+			client.invoke("send", new MsgSend(){{ this.subject = "proposal"; this.body = o.toString();}});
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
+	}
+
+	public boolean addOffer(int Scheme ,String giveAsset, double giveQuantty, String[] giveUtxos, double takeQuantity,
+			String takeAddress, String takeAsset) {
+		 try {
+				client = new JsonRpcHttpClient(new URL("http://127.0.0.1:6712"));	        
+			    
+				Map<String,String> map = client.getHeaders();
+				ObjectMapper om = client.getObjectMapper();
+				final JsonObject o = new JsonObject();
+				JsonArray utx = new JsonArray();
+				JsonArray utxos = new JsonArray();
+				utx.add(new JsonPrimitive(giveUtxos[0]));
+				utx.add(new JsonPrimitive(giveUtxos[1]));
+				utxos.add(utx);
+				
+				o.addProperty("scheme", Scheme);
+				
+				
+				JsonObject JsonGive = new JsonObject();
+				JsonGive.addProperty("quantity", giveQuantty);
+				JsonGive.addProperty("asset", giveAsset);
+				JsonGive.add("giveUtxos", utxos);
+				JsonGive.addProperty("quantity", giveQuantty);
+				
+				o.add("give", JsonGive);
+				
+				JsonObject JsonTake = new JsonObject();
+				JsonTake.addProperty("quantity", takeQuantity);
+				JsonTake.addProperty("asset", takeAsset);
+				JsonTake.addProperty("address", takeAddress);
+				
+				o.add("take", JsonTake);
+				o.addProperty("version", TRADE_MESSAGE_PROTOCOL_VERSION);
+				
+				//o.add("scheme", Scheme);
+							
+				client.invoke("send", new MsgSend(){{ this.subject = "proposal"; this.body = o.toString();}});
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return true;
+		
 	}
 }

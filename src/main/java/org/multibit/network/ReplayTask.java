@@ -1,11 +1,17 @@
 package org.multibit.network;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.multibit.message.Message;
 import org.multibit.model.bitcoin.WalletData;
+
+import com.google.bitcoin.core.Transaction;
+
+import etx.com.trading.ColoredPeerEventListener;
 
 /**
  * A class encapsulating a request on one or more wallets to perform a
@@ -36,13 +42,29 @@ public class ReplayTask {
      * The percent complete as reported by the downloadlistener.
      */
     private long percentComplete;
-       
+    
+    private String followTx;
+    private int outIndex;
+    
+  //  private List<Transaction> reAddList;
+    
+    private ColoredPeerEventListener listener = null;
+         
+    private final Map<String, Integer> colorTransMap = new HashMap<String, Integer>();
+    
     public ReplayTask( List<WalletData> perWalletModelDataToReplay, Date startDate, int startHeight) {
         this.perWalletModelDataToReplay = perWalletModelDataToReplay;
         this.startDate = startDate;
         this.startHeight = startHeight;
         this.percentComplete = Message.NOT_RELEVANT_PERCENTAGE_COMPLETE;
         this.uuid = UUID.randomUUID();
+    }
+    
+    public ReplayTask( List<WalletData> perWalletModelDataToReplay, Date startDate, int startHeight, String txToFollow, int Index) {
+      this(perWalletModelDataToReplay, startDate, startHeight);
+      this.followTx = txToFollow;
+      this.outIndex = Index;
+      colorTransMap.put(this.followTx, this.outIndex);
     }
 
     public List<WalletData> getPerWalletModelDataToReplay() {
@@ -113,6 +135,31 @@ public class ReplayTask {
         return startHeight;
     }
 
+    public String getFollowingTx(){
+     return followTx;
+    }
+    
+    public int getFolloingTxIndex()
+    {
+    	return outIndex;
+    }
+    
+    public Map<String, Integer> getColorMap()
+    {
+    	return colorTransMap;
+    }
+    
+    
+    public void setListener(ColoredPeerEventListener l)
+    {
+    	listener= l;
+    }
+    
+    public ColoredPeerEventListener getListener()
+    {
+    	return listener;
+    }
+    
     public void setStartHeight(int startHeight) {
         this.startHeight = startHeight;
     }

@@ -16,10 +16,28 @@
 
 package org.multibit.network;
 
+import com.google.bitcoin.core.Block;
+import com.google.bitcoin.core.BlockChain;
 import com.google.bitcoin.core.CheckpointManager;
+import com.google.bitcoin.core.GetDataMessage;
+import com.google.bitcoin.core.Peer;
+import com.google.bitcoin.core.PeerEventListener;
 import com.google.bitcoin.core.PeerGroup;
 import com.google.bitcoin.core.StoredBlock;
+import com.google.bitcoin.core.Transaction;
+import com.google.bitcoin.core.TransactionInput;
+import com.google.bitcoin.core.TransactionOutput;
+import com.google.bitcoin.core.Wallet;
+import com.google.bitcoin.discovery.DnsDiscovery;
+import com.google.bitcoin.store.BlockStore;
 import com.google.bitcoin.store.BlockStoreException;
+
+
+import com.google.bitcoin.store.MemoryBlockStore;
+import com.google.bitcoin.utils.Threading;
+
+import etx.com.trading.ColoredPeerEventListener;
+
 import org.multibit.controller.bitcoin.BitcoinController;
 import org.multibit.message.Message;
 import org.multibit.message.MessageManager;
@@ -29,12 +47,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Timer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -84,6 +107,8 @@ public enum ReplayManager {
    */
   public void syncWallet(final ReplayTask replayTask) throws IOException,
           BlockStoreException {
+	  
+	  final boolean addingColor = replayTask.getFollowingTx() != null;
     log.info("Starting replay task : " + replayTask.toString());
 
     // Remember the chain height.
@@ -145,19 +170,53 @@ public enum ReplayManager {
     replayTask.setStartHeight(newChainHeightAfterTruncate);
 
     // Create a new PeerGroup.
-    controller.getMultiBitService().createNewPeerGroup();
+    controller.getMultiBitService().createNewPeerGroup(!addingColor);
     log.debug("Recreated PeerGroup.");
 
     // Hook up the download listeners.
     addDownloadListeners(perWalletModelDataList);
+    
 
-    // Start up the PeerGroup.
+    
     PeerGroup peerGroup = controller.getMultiBitService().getPeerGroup();
+    // Start up the PeerGroup.
     peerGroup.start();
     log.debug("Restarted PeerGroup = " + peerGroup.toString());
+    
+    //hook up listeners for custom tx's
+    if(addingColor) {
+    	// remove all wallets from peer group so they dont set bloom filters
+    	Wallet active = controller.getModel().getActiveWallet();
+    	
+//    	for(WalletData walets : controller.getModel().getPerWalletModelDataList())
+ //   		peerGroup.removeWallet(walets.getWallet());
 
+    	// BlockStore blockStore = new MemoryBlockStore(active.getParams());
+    //	 BlockChain chain = new BlockChain(active.getParams(), active, blockStore);
+
+
+    	// peerGroup = new PeerGroup(active.getParams(), chain);
+
+    	// peerGroup.addPeerDiscovery(new DnsDiscovery(active.getParams()));
+    	
+    	//ExecutorService scriptVerificationExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Date d = null;
+		try {
+			d = sdf.parse("08/04/2014");
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        peerGroup.setFastCatchupTimeSecs(d.getTime() / 1000);
+    	replayTask.setListener(new ColoredPeerEventListener(replayTask.getColorMap(), replayTask.getPerWalletModelDataToReplay().get(0).getWallet()));
+    	controller.getMultiBitService().getPeerGroup().addEventListener(replayTask.getListener(), Threading.USER_THREAD );
+    	
+    }
+
+    
     log.debug("About to start  blockchain download.");
-    controller.getMultiBitService().getPeerGroup().downloadBlockChain();
+    peerGroup.downloadBlockChain();
     log.debug("Blockchain download started.");
   }
 
@@ -293,6 +352,17 @@ public enum ReplayManager {
         }
         // TODO - does not look quite right.
         controller.fireWalletBusyChange(false);
+        
+        //unregister callback for blocks
+        if(currentTask.getListener() != null) {
+        	controller.getMultiBitService().getPeerGroup().removeEventListener(currentTask.getListener());
+        	// add the wallets and add the data to the wallets
+        	currentTask.getPerWalletModelDataToReplay();
+        //	PeerGroup peerGroup = controller.getMultiBitService().getPeerGroup();
+        //	for(WalletData walets : controller.getModel().getPerWalletModelDataList())
+        //		peerGroup.addWallet(walets.getWallet());
+        	
+        }
       }
     } finally {
       // No longer tidying up.

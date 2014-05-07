@@ -6,20 +6,21 @@ import java.util.concurrent.Executors;
 import javax.swing.table.AbstractTableModel;
 
 import etx.com.trading.BaseTrading.Asset;
+import etx.com.trading.BaseTrading.Proposal;
 
-public class BaseTradingModel extends AbstractTableModel {
+public class BaseTradesModel extends AbstractTableModel {
 	
 	private BaseTrading model = BaseTrading.getInstance();
-	private List<Asset> dataSource = null;
+	private List<Proposal> dataSource = null;
 	
-	public BaseTradingModel()
+	public BaseTradesModel()
 	{
 		Executors.newSingleThreadExecutor().execute(new Runnable() {
 			@Override
 			  public void run() {
-				dataSource = model.getAssetList();
-				BaseTradingModel.this.fireTableStructureChanged();
-				BaseTradingModel.this.fireTableDataChanged();				
+				dataSource = model.getProposals();
+				BaseTradesModel.this.fireTableStructureChanged();
+				BaseTradesModel.this.fireTableDataChanged();				
 			  };
 		});
 			
@@ -51,14 +52,14 @@ public class BaseTradingModel extends AbstractTableModel {
 		return dataSource == null ? null : dataSource.get(0).getColumnNames()[columnIndex];
 	}
 	
-	public Asset getAssetById(final String Id){
-		int index = dataSource.indexOf(new Asset() { {this.id = Id; } } );
+	public Proposal getAssetById(final String Id){
+		int index = dataSource.indexOf(new Proposal() { {this.id.equals(Id); } } );
 		if(index >= 0)
 			return dataSource.get(index);
 		return null;
 	}
 	
-	public Asset getAssetAtRow(int row){		
+	public Proposal getAssetAtRow(int row){		
 		if(row >= 0)
 			return dataSource.get(row);
 		return null;
