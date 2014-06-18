@@ -97,8 +97,9 @@ public class CreateNewOfferPanel extends JPanel implements Viewable {
     private MultiBitLabel sendQuantityLabel;
     private MultiBitLabel recviveAssetLabel;
     private MultiBitLabel quantityLabel = new MultiBitLabel("");
-    private JFormattedTextField sendQuantity = new JFormattedTextField(NumberFormat.getNumberInstance());
-    private JFormattedTextField reciveQuantity = new JFormattedTextField(NumberFormat.getNumberInstance());
+    
+    private JFormattedTextField sendQuantity =  null;
+    private JFormattedTextField reciveQuantity = null;
     
     private JComboBox selectAssetCB;
     private JComboBox selectWalletCB;
@@ -115,6 +116,11 @@ public class CreateNewOfferPanel extends JPanel implements Viewable {
 		this.controller = bitcoinController;
 		this.panel = tradePanel;
 		this.dialog = createOfferDialog;
+		NumberFormat f = NumberFormat.getNumberInstance();
+		f.setMaximumFractionDigits(10);
+		f.setMaximumIntegerDigits(10);
+	    sendQuantity =  new JFormattedTextField(f);
+	    reciveQuantity = new JFormattedTextField(f);
 		
 		GridBagLayout gridLayout = new GridBagLayout();
 		 GridBagConstraints c = new GridBagConstraints();
@@ -164,16 +170,18 @@ public class CreateNewOfferPanel extends JPanel implements Viewable {
 		String[] colors = ColorProperty.deserlizie(wdata.getWalletInfo().getProperty(ColorProperty.propertyName));
 		
         selectAssetCB = new JComboBox();
+    	selectAssetCB.addItem("Please Select a color");
+    	selectAssetCB.addItem("BTC");
         if(colors != null)
         {
-        	selectAssetCB.addItem("Please Select a color");
+
         	for(String color : colors)
         		selectAssetCB.addItem(color);
         }
-        else
-        {
-        	selectAssetCB.addItem(controller.getLocaliser().getString("createNewOfferPanel.noAssetInWallet"));
-        }
+     //   else
+     //   {
+     //   	selectAssetCB.addItem(controller.getLocaliser().getString("createNewOfferPanel.noAssetInWallet"));
+     //   }
         
         selectAssetCB.addActionListener( new ActionListener() {
 			
@@ -321,7 +329,7 @@ public class CreateNewOfferPanel extends JPanel implements Viewable {
 				//create offer
 				//find what we need for the give
 				double available = 0;
-				
+				NumberFormat nf = NumberFormat.getInstance();
 				Set<com.google.bitcoin.core.Transaction> trans = wdata.getWallet().getTransactions(false);
 				for (Iterator<com.google.bitcoin.core.Transaction> it = trans.iterator(); it.hasNext(); ) {
 					com.google.bitcoin.core.Transaction t = it.next();
@@ -329,48 +337,85 @@ public class CreateNewOfferPanel extends JPanel implements Viewable {
 						List<TransactionOutput> outputs = t.getOutputs();
 						for(int i = 0; i < outputs.size(); i++)
 						{
-							if(outputs.get(i).isAvailableForSpending()) {
+							if(outputs.get(i).isAvailableForSpending() && outputs.get(i).isMine(wdata.getWallet())) {
 								ColorGenisis cg = bt.GetColorTransactionSearchHistory(wdata.getWallet(), t.getHashAsString(), i);
 				    			if( cg != null) {
 				    				// we can spend this!!!!!!!
 				    				System.out.println("We can spend this!!!!!!");
 				    				Asset ast = bt.getAssetForTransaction(cg.txout, cg.index);
 				    				// are we talking about the asset we want to trade?
-				    				if(ast.id.equals(selectAssetCB.getItemAt(selectAssetCB.getSelectedIndex()))) {
+				    				if(ast.symbol.equals(selectAssetCB.getItemAt(selectAssetCB.getSelectedIndex()))) {
 				    					available += outputs.get(i).getValue().doubleValue() * ast.satoshi_multiplyier;
 				    					// do we have enough
-				    					if(available >= Double.parseDouble(sendQuantity.getText())){
-				    						//t.getHashAsString();
-				    						//i;
-				    						//ast.id
-				    						String address;
-				    						WalletData selectedwdata = ((BitcoinController) controller).getModel().getPerWalletModelDataByWalletFilename(
-				    								(String)selectWalletCB.getItemAt(selectWalletCB.getSelectedIndex()));
-				    						address = selectedwdata.getWallet().getChangeAddress().toString();
+				    					
+				    					try {
+											if(available >= nf.parse(sendQuantity.getText()).doubleValue()){
+												String address;
+												WalletData selectedwdata = ((BitcoinController) controller).getModel().getPerWalletModelDataByWalletFilename(
+														(String)selectWalletCB.getItemAt(selectWalletCB.getSelectedIndex()));
+												address = selectedwdata.getWallet().getChangeAddress().toString();
 
-				    						bt.addOffer(bt.GetColorScheme(), 
-				    								ast.id, 
-				    								Double.parseDouble(sendQuantity.getText()),
-				    								new String[] { t.getHashAsString(), "" + i } ,
-				    								Double.parseDouble(reciveQuantity.getText()),
-				    								address,
-				    								(String)reciveAssetCB.getItemAt(reciveAssetCB.getSelectedIndex()));
-				    						
-				    						((OkAction)(createOfferButton.getAction())).close();
-				    						return;
-				    						
-				    					}
+												bt.addOffer(bt.GetColorScheme(), 
+														ast.id, 
+														nf.parse(sendQuantity.getText()).doubleValue(),
+														new String[] { t.getHashAsString(), "" + i } ,
+														nf.parse(reciveQuantity.getText()).doubleValue(),
+														address,
+														bt.getAssetBySymbol((String)reciveAssetCB.getItemAt(reciveAssetCB.getSelectedIndex())).id);
+												
+												((OkAction)(createOfferButton.getAction())).close();
+												return;
+												
+											}
+										} catch (NumberFormatException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										} catch (ParseException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
 				    				}
 				    				//TODO ISSUE: make sure wallet also has enough satoshi to pay the fee for this transaction.
 				    				
 				    			}
+				    			else {
+				    				if(selectAssetCB.getItemAt(selectAssetCB.getSelectedIndex()).equals("BTC")) {
+				    					available += outputs.get(i).getValue().doubleValue();
+				    					// do we have enough
+				    					try {
+											if(available >= nf.parse(sendQuantity.getText()).doubleValue()){
+												String address;
+												WalletData selectedwdata = ((BitcoinController) controller).getModel().getPerWalletModelDataByWalletFilename(
+														(String)selectWalletCB.getItemAt(selectWalletCB.getSelectedIndex()));
+												address = selectedwdata.getWallet().getChangeAddress().toString();
+
+												bt.addOffer(bt.GetColorScheme(), 
+														"BTC", 
+														nf.parse(sendQuantity.getText()).doubleValue(),
+														new String[] { t.getHashAsString(), "" + i } ,
+														nf.parse(reciveQuantity.getText()).doubleValue(),
+														address,
+														(String)reciveAssetCB.getItemAt(reciveAssetCB.getSelectedIndex()));
+												
+												((OkAction)(createOfferButton.getAction())).close();
+												return;
+											}
+										} catch (ParseException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+				    				}
+				    			}
+				    					
 							}
 						}
 					}
 				}
+				//if we got here it might be because we dont have enough unspent of the asset we wanted to give in the selected wallet.
+				
 				//selectWalletCB.getItemAt(selectWalletCB.getSelectedIndex());
 				
-				((OkAction)(createOfferButton.getAction())).close();
+				//((OkAction)(createOfferButton.getAction())).close();
 				
 			}
 		});

@@ -345,6 +345,7 @@ public class MultiBitService {
       // Use DNS for production, IRC for test.
       if (TESTNET3_GENESIS_HASH.equals(bitcoinController.getModel().getNetworkParameters().getGenesisBlock().getHashAsString())) {
         peerGroup.addPeerDiscovery(new IrcDiscovery(IRC_CHANNEL_TESTNET3));
+        peerGroup.addPeerDiscovery(new DnsDiscovery(networkParameters));
       } else if (NetworkParameters.testNet().equals(bitcoinController.getModel().getNetworkParameters())) {
         peerGroup.addPeerDiscovery(new IrcDiscovery(IRC_CHANNEL_TEST));
       } else {

@@ -19,6 +19,10 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import com.google.bitcoin.core.Transaction;
+import com.google.bitcoin.core.TransactionOutput;
+
+import etx.com.trading.BaseTrading;
+import etx.com.trading.BaseTrading.ColorGenisis;
 
 /**
  * Class used to store the data in the Transactions table in a quick to access data form.
@@ -34,6 +38,9 @@ public class WalletTableData {
             "sendBitcoinPanel.amountLabel" };
 
     private Transaction transaction;
+    private WalletData wallet;
+    
+    private static BaseTrading bt = BaseTrading.getInstance();
     
     /**
      * The height of the block this transaction appears in.
@@ -46,9 +53,15 @@ public class WalletTableData {
     private BigInteger debit;
     private BigInteger credit;
 
+    public WalletTableData(Transaction transaction, WalletData wallet) {
+        this.transaction = transaction;
+        this.wallet = wallet;
+    }
+    /*
     public WalletTableData(Transaction transaction) {
         this.transaction = transaction;
     }
+    */
 
     public Transaction getTransaction() {
         return transaction;
@@ -105,5 +118,15 @@ public class WalletTableData {
 
     public void setCredit(BigInteger credit) {
         this.credit = credit;
+    }
+    
+    public boolean isColoredTransaction() {
+    	for(int i=0; i < transaction.getOutputs().size(); i ++) {
+    		TransactionOutput tout = transaction.getOutput(i);
+    		ColorGenisis cg = bt.GetColorTransactionSearchHistory(wallet.getWallet(), transaction.getHashAsString(), i);
+    		if(cg != null)
+    			return true;
+    	}
+    	return false;
     }
 }

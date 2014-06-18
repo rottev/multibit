@@ -357,11 +357,11 @@ public enum ReplayManager {
         if(currentTask.getListener() != null) {
         	controller.getMultiBitService().getPeerGroup().removeEventListener(currentTask.getListener());
         	// add the wallets and add the data to the wallets
-        	currentTask.getPerWalletModelDataToReplay();
-        //	PeerGroup peerGroup = controller.getMultiBitService().getPeerGroup();
-        //	for(WalletData walets : controller.getModel().getPerWalletModelDataList())
-        //		peerGroup.addWallet(walets.getWallet());
-        	
+        	for(WalletData w : currentTask.getPerWalletModelDataToReplay()) {
+        		controller.getFileHandler().savePerWalletModelData(w, true);
+        		//w.getWallet().saveToFile(w.);
+        	}
+
         }
       }
     } finally {

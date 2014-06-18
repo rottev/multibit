@@ -20,6 +20,8 @@ import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.TransactionInput;
 import com.google.bitcoin.core.TransactionOutput;
 import com.google.bitcoin.core.Wallet.BalanceType;
+import com.google.bitcoin.core.WalletTransaction;
+import com.google.bitcoin.core.WalletTransaction.Pool;
 
 import etx.com.trading.BaseTrading;
 import etx.com.trading.BaseTrading.Asset;
@@ -48,6 +50,8 @@ import org.multibit.viewsystem.swing.view.panels.HelpContentsPanel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+
+
 
 
 
@@ -100,6 +104,7 @@ public class SingleWalletPanel extends JPanel implements ActionListener, FocusLi
   {
 
 	public java.util.List<String> transactionHashes = new ArrayList<String>();
+	public double value;
 	
 	public TransLabel(Controller controller, boolean isLarge) {
 		super(controller, isLarge);
@@ -682,18 +687,24 @@ public class SingleWalletPanel extends JPanel implements ActionListener, FocusLi
               ColorAndFontConstants.BACKGROUND_COLOR.getBlue() - COLOR_DELTA), Math.max(0, ColorAndFontConstants.BACKGROUND_COLOR.getGreen() - COLOR_DELTA));
     }
     //etx
+    try
+    {
     BaseTrading bt = BaseTrading.getInstance();
-    LinkedList<TransactionOutput> all = perWalletModelData.getWallet().calculateAllSpendCandidates(false);
-    System.out.println("transactions count: " + all.size());
+   // LinkedList<TransactionOutput> all = perWalletModelData.getWallet().calculateAllSpendCandidates(false);
+  //  System.out.println("transactions count: " + all.size());
     BigInteger value = BigInteger.ZERO;
     PeerGroup peerGroup = bitcoinController.getMultiBitService().getPeerGroup();
-    
+    /*
     for (TransactionOutput out : all) 
     {
+    	if(!out.isMine(perWalletModelData.getWallet()))
+    		continue;
     	List<TransactionOutput> outi = out.getParentTransaction().getOutputs();
     	System.out.println("output count: " + outi.size());
     	for(int outindex =0;  outindex < outi.size(); outindex ++) {
     		TransactionOutput singleOutput = outi.get(outindex);
+    		if(!singleOutput.isMine(perWalletModelData.getWallet()))
+    			continue;
     		System.out.println("Checking index(" + outindex + ")" +" trans: " + singleOutput.getParentTransaction().getHashAsString() );
     		System.out.println("Mine: " + singleOutput.isMine(perWalletModelData.getWallet()) + " Avilable: " + singleOutput.isAvailableForSpending() + " Color: " +
     				bt.IsColorTransaction(  singleOutput.getParentTransaction().getHashAsString(), outindex));
@@ -719,7 +730,9 @@ public class SingleWalletPanel extends JPanel implements ActionListener, FocusLi
 			    		bl.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
 			    		bl.setBlinkEnabled(true);
 			    		bl.setHorizontalAlignment(JLabel.TRAILING);
-			    		bl.setText((singleOutput.getValue().doubleValue() * ast.satoshi_multiplyier) + " " + ast.symbol);
+			    		bl.value = singleOutput.getValue().doubleValue() * ast.satoshi_multiplyier;
+			    		bl.setText(bl.value + " " + ast.symbol);
+			    		bl.transactionHashes.add(String.valueOf(singleOutput.hashCode()));
 			    		
 			    		GridBagConstraints con = new GridBagConstraints();
 			    		con.fill = GridBagConstraints.BOTH;
@@ -740,9 +753,18 @@ public class SingleWalletPanel extends JPanel implements ActionListener, FocusLi
 			    		myRoundedPanel.add(bl, con);
 			    		myRoundedPanel.setPreferredSize(new Dimension(1000, 1000));
 		    		}
+		    		else {
+		    			TransLabel bl =coloredValuesLabel.get(ast);
+		    			if(!bl.transactionHashes.contains(String.valueOf(singleOutput.hashCode()))) {
+		    				bl.transactionHashes.add(String.valueOf(singleOutput.hashCode()));
+		    				bl.value += singleOutput.getValue().doubleValue() * ast.satoshi_multiplyier;
+			    			bl.setText(bl.value + " " + ast.symbol);
+		    			}
+		    		}
 		    	}
 		    	else
 		    	{
+		    		
 		    		System.out.println("value is " + value + " before adding");
 		    		System.out.println("adding: " + singleOutput.hashCode() + " value: " + singleOutput.getValue() + " for wallet " + perWalletModelData.getWallet().toString());
 		    		value = value.add(singleOutput.getValue());
@@ -751,9 +773,80 @@ public class SingleWalletPanel extends JPanel implements ActionListener, FocusLi
 	    }
     	
     }
+   */
+    
+    perWalletModelData.getWallet().getWalletTransactions();
+	Set<com.google.bitcoin.core.Transaction> trans = perWalletModelData.getWallet().getTransactions(false);
+//	for (Iterator<com.google.bitcoin.core.Transaction> it = trans.iterator(); it.hasNext(); ) {
+	for(WalletTransaction wt : perWalletModelData.getWallet().getWalletTransactions())	{
+		if(wt.getPool() != Pool.DEAD && wt.getPool() != Pool.SPENT) {
+			Transaction t = wt.getTransaction();
+			//if(t.getValueSentToMe(perWalletModelData.getWallet()).equals(BigInteger.ZERO)) continue;
+			if(t.isMine( perWalletModelData.getWallet()) && !t.isEveryOwnedOutputSpent(perWalletModelData.getWallet())) {
+				List<TransactionOutput> outputs = t.getOutputs();
+				for(int i = 0; i < outputs.size(); i++)
+				{
+					TransactionOutput out = t.getOutput(i);
+					if(out.isMine(perWalletModelData.getWallet()) && out.isAvailableForSpending()) {
+				    	ColorGenisis cg = bt.GetColorTransactionSearchHistory(perWalletModelData.getWallet(), out.getParentTransaction().getHashAsString(), i);
+		    			if( cg != null)
+				    	{
+				    		Asset ast = bt.getAssetForTransaction(cg.txout, cg.index);
+				    		if(!coloredValuesLabel.containsKey(ast)) {
+				    			TransLabel bl = new TransLabel(controller, false);
+					    		bl.setBackground(ColorAndFontConstants.BACKGROUND_COLOR);
+					    		bl.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
+					    		bl.setBlinkEnabled(true);
+					    		bl.setHorizontalAlignment(JLabel.TRAILING);
+					    		bl.value = out.getValue().doubleValue() * ast.satoshi_multiplyier;
+					    		bl.setText(bl.value + " " + ast.symbol);
+					    		bl.transactionHashes.add(String.valueOf(out.hashCode()));
+					    		
+					    		GridBagConstraints con = new GridBagConstraints();
+					    		con.fill = GridBagConstraints.BOTH;
+					    		con.gridx = 6;
+					    		con.gridy = 4 + coloredValuesLabel.size();
+					    		con.weightx = 0.1;
+					    		con.weighty = 0.1;
+					    		con.gridwidth = 2;
+					    		con.gridheight = 1;
+					    	//	con.anchor = GridBagConstraints.LINE_END;
+					    	    
+					    		Dimension d = myRoundedPanel.getSize(); 
+					    		d.height += 1 * fontMetrics.getHeight();
+				
+					    		
+					    		coloredValuesLabel.put(ast,bl);
+					    		//System.out.println(" we found a color tranaction in our wallet" );
+					    		myRoundedPanel.add(bl, con);
+					    		myRoundedPanel.setPreferredSize(new Dimension(1000, 1000));
+				    		}
+				    		else {
+				    			TransLabel bl =coloredValuesLabel.get(ast);
+				    			if(!bl.transactionHashes.contains(String.valueOf(out.hashCode()))) {
+				    				bl.transactionHashes.add(String.valueOf(out.hashCode()));
+				    				bl.value += out.getValue().doubleValue() * ast.satoshi_multiplyier;
+					    			bl.setText(bl.value + " " + ast.symbol);
+				    			}
+				    		}
+				    	}
+				    	else
+				    	{
+				    		
+				    		System.out.println("value is " + value + " before adding");
+				    		System.out.println("adding: " + out.toString() + " value: " + out.getValue() + " for wallet: " + perWalletModelData.getWalletFilename());
+				    		value = value.add(out.getValue());
+				    	}
+		    		}
+				}
+			}
+		}
+		
+	}
    
     
-    System.out.println("compare value " + value +  " to wallet " + perWalletModelData.getWallet().getBalance(BalanceType.ESTIMATED));
+    System.out.println(perWalletModelData.getWalletFilename() + " compare value " + value +  " to wallet " + perWalletModelData.getWallet().getBalance(BalanceType.ESTIMATED));
+
     //etx
     
     BigInteger estimatedBalance = value; // != BigInteger.ZERO ? value : perWalletModelData.getWallet().getBalance(BalanceType.ESTIMATED);
@@ -806,6 +899,10 @@ public class SingleWalletPanel extends JPanel implements ActionListener, FocusLi
     invalidate();
     revalidate();
     repaint();
+    }
+    catch(Exception ex){
+    	ex.printStackTrace();
+    }
   }
 
   public void setSyncMessage(String message, double syncPercent) {

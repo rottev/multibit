@@ -2,7 +2,9 @@ package etx.com.trading;
 
 import java.util.List;
 import java.util.concurrent.Executors;
-
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import static java.util.concurrent.TimeUnit.*;
 import javax.swing.table.AbstractTableModel;
 
 import etx.com.trading.BaseTrading.Asset;
@@ -11,15 +13,20 @@ public class BaseAssetModel extends AbstractTableModel {
 	
 	private BaseTrading model = BaseTrading.getInstance();
 	private List<Asset> dataSource = null;
-	
+
+     
+
+
 	public BaseAssetModel()
 	{
 		Executors.newSingleThreadExecutor().execute(new Runnable() {
 			@Override
 			  public void run() {
 				dataSource = model.getAssetList();
-				BaseAssetModel.this.fireTableStructureChanged();
-				BaseAssetModel.this.fireTableDataChanged();				
+				if(dataSource != null) {
+					BaseAssetModel.this.fireTableStructureChanged();
+					BaseAssetModel.this.fireTableDataChanged();				
+				}
 			  };
 		});
 			
@@ -62,6 +69,20 @@ public class BaseAssetModel extends AbstractTableModel {
 		if(row >= 0)
 			return dataSource.get(row);
 		return null;
+	}
+	
+	public void Refresh()
+	{
+		Executors.newSingleThreadExecutor().execute(new Runnable() {
+			@Override
+			  public void run() {
+				dataSource = model.getAssetList(true);
+				if(dataSource != null) {
+					//BaseAssetModel.this.fireTableStructureChanged();
+					BaseAssetModel.this.fireTableDataChanged();				
+				}
+			  };
+		});
 	}
 
 }

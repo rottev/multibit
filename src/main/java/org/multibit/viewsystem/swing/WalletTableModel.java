@@ -112,16 +112,19 @@ public class WalletTableModel extends AbstractTableModel {
         case 3:
             // Amount in BTC
             BigInteger debitAmount = walletDataRow.getDebit();
+            String value = "";
             if (debitAmount != null && debitAmount.compareTo(BigInteger.ZERO) > 0) {
-                return controller.getLocaliser().bitcoinValueToString(debitAmount.negate(), false, true);
+            	value = controller.getLocaliser().bitcoinValueToString(debitAmount.negate(), false, true);
+            } else {
+	            BigInteger creditAmount = walletDataRow.getCredit();
+	            if (creditAmount != null) {
+	            	value = controller.getLocaliser().bitcoinValueToString(creditAmount, false, true);
+	            }
             }
-
-            BigInteger creditAmount = walletDataRow.getCredit();
-            if (creditAmount != null) {
-                return controller.getLocaliser().bitcoinValueToString(creditAmount, false, true);
-            }
+            if(walletDataRow.isColoredTransaction())
+            	if(!value.equals("")) value += " Color";
             
-            return null;         
+            return value;         
         case 4:
             // Amount in fiat
             if (walletDataRow.getDebit() != null  && walletDataRow.getDebit().compareTo(BigInteger.ZERO) > 0) {

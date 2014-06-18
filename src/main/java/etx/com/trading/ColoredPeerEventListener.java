@@ -87,7 +87,8 @@ public class ColoredPeerEventListener implements PeerEventListener {
 					if(addToWallet) {
 						if(workingWallet.getTransaction(t.getHash()) == null) {
 							System.err.println("AddingColorTx: " + t);
-							workingWallet.addWalletTransaction(new com.google.bitcoin.core.WalletTransaction(Pool.PENDING, t));					
+							workingWallet.addWalletTransaction(new com.google.bitcoin.core.WalletTransaction(Pool.PENDING, t));
+							
 						}
 					}
 				}

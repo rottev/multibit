@@ -259,7 +259,7 @@ public class ExportTransactionsSubmitAction extends AbstractAction {
             CSVWriter<WalletTableData> csvHeaderWriter = new CSVWriterBuilder<WalletTableData>(outputStreamWriter).strategy(CSVStrategy.UK_DEFAULT)
                     .entryConverter(headerConverter).build();
             
-            csvHeaderWriter.write(new WalletTableData(null));
+            csvHeaderWriter.write(new WalletTableData(null, null));
             
             // Write the body of the CSV file.
             WalletTableDataEntryConverter converter = new WalletTableDataEntryConverter();

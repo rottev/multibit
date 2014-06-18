@@ -431,7 +431,9 @@ public class BitcoinModel extends AbstractModel<CoreModel> {
 
         if (transactions != null) {
             for (Transaction loopTransaction : transactions) {
-                WalletTableData walletDataRow = new WalletTableData(loopTransaction);
+            	if(!loopTransaction.isMine(perWalletModelData.getWallet()))
+            		continue;
+                WalletTableData walletDataRow = new WalletTableData(loopTransaction, perWalletModelData);
                 walletData.add(walletDataRow);
                 walletDataRow.setCredit(loopTransaction.getValueSentToMe(perWalletModelData.getWallet()));
                 try {

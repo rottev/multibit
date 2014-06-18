@@ -64,14 +64,14 @@ public class BaseProposalModel extends AbstractTableModel {
 	{
 		return dataSource == null ? null : dataSource.get(0).getColumnNames()[columnIndex];
 	}
-	
+	/*
 	public Proposal getProposalById(final String Id){
 		int index = dataSource.indexOf(new Asset() { {this.id = Id; } } );
 		if(index >= 0)
 			return dataSource.get(index);
 		return null;
 	}
-	
+	*/
 	public Proposal getProposalAtRow(int row){		
 		if(row >= 0)
 			return dataSource.get(row);
