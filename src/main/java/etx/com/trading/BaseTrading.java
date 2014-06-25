@@ -465,7 +465,7 @@ public class BaseTrading {
 		
 		List<Asset> result = null;
 		try {
-			result = Request.Get("http://localhost:8080/asset"/*"https://dl.dropboxusercontent.com/u/13369450/assets.json" */)
+			result = Request.Get("lb1.colorcoins.na.tl/asset"/*"https://dl.dropboxusercontent.com/u/13369450/assets.json" */)
 			        .execute().handleResponse(new ResponseHandler<List<Asset>>() {
 
 						@Override
@@ -549,7 +549,7 @@ public class BaseTrading {
 	public Map<String, Issuance> fetchIssuane(){
 		Map<String, Issuance> result = null;
 		try {
-			result = Request.Get("http://localhost:8080/issue"/*"https://dl.dropboxusercontent.com/u/13369450/issuance.json"*/)
+			result = Request.Get("http://lb1.colorcoins.na.tl/issue"/*"https://dl.dropboxusercontent.com/u/13369450/issuance.json"*/)
 			        .execute().handleResponse(new ResponseHandler<Map<String,Issuance>>() {
 
 						@Override
@@ -770,18 +770,18 @@ public class BaseTrading {
 		if(IsColorTransaction(txhash,outIndex ))
 			return new ColorGenisis(){{ index = outIndex; txout = txhash; }};
 		
-		for (Iterator<Transaction> it = trans.iterator(); it.hasNext(); ) {
-			Transaction t = it.next();
-			if(t.getHashAsString().equals(txhash)){
-				for(TransactionInput ins : t.getInputs()){
+		//for (Iterator<Transaction> it = trans.iterator(); it.hasNext(); ) {
+		//	Transaction t = it.next();
+		//	if(t.getHashAsString().equals(txhash)){
+		//		for(TransactionInput ins : t.getInputs()){
 					//if(ins.getConnectedOutput() != null && ins.getConnectedOutput().equals(t.getOutput(outIndex))){
 						//trans.remove(t);
-						return DoesTransactionHaveAColor(trans, ins.getOutpoint().getHash().toString(), (int)ins.getOutpoint().getIndex(), w);
+						return DoesTransactionHaveAColor(trans, txhash, outIndex, w);
 					//}
-				}
-			}
-		}
-		return null;
+			//	}
+		//	}
+		//}
+		//return null;
 	}
 
 	public Asset getAssetForTransaction(final String txhash, final int index) {
@@ -984,7 +984,7 @@ public class BaseTrading {
 		String a = null;
 		try {
 
-			a = Request.Post("http://localhost:8080/asset").bodyString(new Gson().toJson(asset, Asset.class), ContentType.APPLICATION_JSON )
+			a = Request.Post("http://lb1.colorcoins.na.tl/asset").bodyString(new Gson().toJson(asset, Asset.class), ContentType.APPLICATION_JSON )
 			        .execute().handleResponse(new ResponseHandler<String>() {
 
 						@Override
@@ -1134,7 +1134,7 @@ public class BaseTrading {
 			is.outputindex = outIndex;
 		
 
-			ret = Request.Post("http://localhost:8080/issue/" + key).bodyString(new Gson().toJson(is, Issuance.class), ContentType.APPLICATION_JSON )
+			ret = Request.Post("http://lb1.colorcoins.na.tl/issue/" + key).bodyString(new Gson().toJson(is, Issuance.class), ContentType.APPLICATION_JSON )
 			        .execute().handleResponse(new ResponseHandler<Boolean>() {
 
 						@Override

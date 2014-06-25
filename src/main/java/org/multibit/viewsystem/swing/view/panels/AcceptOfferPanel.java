@@ -130,7 +130,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 	protected Action createNewColoredAddressAction;
 	private CreateNewColoredReceivingAddressAction createNewColoredReceivingAddressAction;
 	protected MultiBitFrame mainFrame;
-	private MultiBitButton createOfferButton;
+	private MultiBitButton acceptOfferButton;
 	private MultiBitButton cancelOfferButton;
 	private TradeingPanel panel;
 	private AcceptOfferDialog dialog;
@@ -178,8 +178,8 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
         cancelOfferButton = new MultiBitButton(cancelAction, controller);
         
         OkAction okAction = new OkAction(controller, ImageLoader.createImageIcon(ImageLoader.ACCEPT_ICON_FILE), acceptOfferDialog);
-        createOfferButton = new MultiBitButton(okAction,  controller);
-        createOfferButton.setEnabled(false);
+        acceptOfferButton = new MultiBitButton(okAction,  controller);
+        acceptOfferButton.setEnabled(false);
       
 		
         GridBagConstraints c2 = new GridBagConstraints();
@@ -289,13 +289,13 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
         constraints.anchor = GridBagConstraints.WEST;
 	    
         constraints.gridx = 1;
-        buttonsPanel.add(createOfferButton, constraints);
+        buttonsPanel.add(acceptOfferButton, constraints);
         constraints.gridx = 2;
         buttonsPanel.add(cancelOfferButton, constraints);
         constraints.gridx = 0;
         panel.add(buttonsPanel, constraints);
 	    
-        createOfferButton.addActionListener(new ActionListener() {
+        acceptOfferButton.addActionListener(new ActionListener() {
 			
 			private BaseTrading bt = BaseTrading.getInstance();
 			
@@ -339,7 +339,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 					        formatter.format("%02x", b);  
 					    }
 					    bt.createFufil(bt.GetColorScheme(), formatter.toString(), pinfo.hash.toString() );
-					    ((OkAction)(createOfferButton.getAction())).close();
+					    ((OkAction)(acceptOfferButton.getAction())).close();
 					    return; // donep
 					}
 					
@@ -606,7 +606,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 	{
 		boolean enable = false;
 		enable = (sendWalletCB.getSelectedIndex() != 0 && reciveWalletCB.getSelectedIndex() != 0);
-		createOfferButton.setEnabled(enable);
+		acceptOfferButton.setEnabled(enable);
 	}
 	
 	@Override
