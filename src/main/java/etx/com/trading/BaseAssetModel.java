@@ -37,7 +37,7 @@ public class BaseAssetModel extends AbstractTableModel {
 	@Override
 	public int getColumnCount() {
 		// TODO Auto-generated method stub
-		return dataSource == null ? 0 : dataSource.get(0).getColumnNames().length;
+		return dataSource == null ? 0 : (dataSource.size() == 0 ? 0 : dataSource.get(0).getColumnNames().length);
 	}
 
 	@Override

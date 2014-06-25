@@ -465,7 +465,7 @@ public class BaseTrading {
 		
 		List<Asset> result = null;
 		try {
-			result = Request.Get("lb1.colorcoins.na.tl/asset"/*"https://dl.dropboxusercontent.com/u/13369450/assets.json" */)
+			result = Request.Get("http://lb1.colorcoins.na.tl/asset"/*"https://dl.dropboxusercontent.com/u/13369450/assets.json" */)
 			        .execute().handleResponse(new ResponseHandler<List<Asset>>() {
 
 						@Override
@@ -473,20 +473,23 @@ public class BaseTrading {
 								throws ClientProtocolException, IOException {
 							// TODO Auto-generated method stub
 							BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
+							List<Asset> assets = new ArrayList<Asset>();
+							
 							StringBuffer result = new StringBuffer();
 							String line = "";
 							while ((line = rd.readLine()) != null) {
 							    result.append(line);
 							}
 
-							Asset[] json =  new Gson().fromJson(result.toString(),Asset[].class);
-							//Map<String, String> map = new Gson().fromJson(result.toString(), new TypeToken<Map<String, String>>() {}.getType());
-							//System.out.println(map.get("name"));
+								Asset[] json =  new Gson().fromJson(result.toString(),Asset[].class);
+								//Map<String, String> map = new Gson().fromJson(result.toString(), new TypeToken<Map<String, String>>() {}.getType());
+								//System.out.println(map.get("name"));
+								
+	
+								
+								assets= new ArrayList<Asset>(Arrays.asList(json));
 							
 
-							
-							List<Asset> assets = new ArrayList<Asset>(Arrays.asList(json));
 							//System.out.println(assets.get(0).name);
 							return assets;
 						}
@@ -593,6 +596,8 @@ public class BaseTrading {
   // color parts
 	public boolean IsColorTransaction(String txhash, int outIndex)
 	{
+		if(getIssuane() == null)
+			return false;
 		
 		return getIssuane().containsKey(txhash + ":" + outIndex);
 	}

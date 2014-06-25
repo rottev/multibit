@@ -107,7 +107,7 @@ public class BaseTradesModel extends AbstractTableModel {
 	public int getColumnCount() {
 		// TODO Auto-generated method stub
 		synchronized (lock) {
-			return dataSource == null ? 0 : dataSource.get(0).getColumnNames().length;
+			return dataSource == null ? 0 : (dataSource.get(0) == null ? 0 : dataSource.get(0).getColumnNames().length);
 		}
 	}
 
