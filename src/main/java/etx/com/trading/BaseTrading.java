@@ -77,6 +77,7 @@ public class BaseTrading {
 	private static List<Proposal> proposals = new ArrayList<Proposal>();
 	private static List<Fufilment> fufillments = new ArrayList<Fufilment>();
 	private static List<FufilEventListener> fuflemntEventListeners = new ArrayList<FufilEventListener>();
+	public static int JSON_RPC_PORT = 6712;
 	
 	public static enum ColoringMode {
 		MODE_ORDER_BASED,
@@ -804,7 +805,7 @@ public class BaseTrading {
 	{
 		try
 		{
-			 client = new JsonRpcHttpClient(new URL("http://127.0.0.1:6712"));
+			 client = new JsonRpcHttpClient(new URL("http://127.0.0.1:" + JSON_RPC_PORT));
 			 
 			  Map<String,String> map = client.getHeaders();
 			  ObjectMapper om = client.getObjectMapper();
@@ -853,7 +854,7 @@ public class BaseTrading {
 			String takeAddress, String takeAsset)
 	{
 		 try {
-			client = new JsonRpcHttpClient(new URL("http://127.0.0.1:6712"));	        
+			client = new JsonRpcHttpClient(new URL("http://127.0.0.1:" + JSON_RPC_PORT));	        
 		    
 			Map<String,String> map = client.getHeaders();
 			ObjectMapper om = client.getObjectMapper();
@@ -901,7 +902,7 @@ public class BaseTrading {
 			String takeAddress, String takeAsset) {
 		 try {
 			 	BaseStore database = new BaseStore("ccdb2") ; 
-				client = new JsonRpcHttpClient(new URL("http://127.0.0.1:6712"));	        
+				client = new JsonRpcHttpClient(new URL("http://127.0.0.1:" + JSON_RPC_PORT));	        
 			    
 				Map<String,String> map = client.getHeaders();
 				ObjectMapper om = client.getObjectMapper();
@@ -946,7 +947,7 @@ public class BaseTrading {
 	public boolean createFufil(int Scheme, String txHex, String proposalHash)
 	{
 		try {
-			client = new JsonRpcHttpClient(new URL("http://127.0.0.1:6712"));	        
+			client = new JsonRpcHttpClient(new URL("http://127.0.0.1:" + JSON_RPC_PORT));	        
 		    
 			Map<String,String> map = client.getHeaders();
 			ObjectMapper om = client.getObjectMapper();

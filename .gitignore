@@ -2,7 +2,9 @@
 /docs
 /log
 /out
-/target
+/target/*
+!/target/*.jar
+!/target/*.exe
 /.classpath
 /bin
 .project
