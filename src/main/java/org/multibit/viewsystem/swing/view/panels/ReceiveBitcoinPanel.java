@@ -33,9 +33,12 @@ import org.multibit.viewsystem.swing.view.components.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import etx.com.trading.BaseTrading.Asset;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -472,4 +475,16 @@ public class ReceiveBitcoinPanel extends AbstractTradePanel implements Viewable 
     public void checkDeleteSendingEnabled() {
         // Not used on receive bitcoin panel.
     }
+
+	@Override
+	public boolean isBTC() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Asset getColorAsset() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

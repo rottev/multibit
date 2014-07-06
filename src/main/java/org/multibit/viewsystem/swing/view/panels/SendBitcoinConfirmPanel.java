@@ -19,6 +19,7 @@ import com.google.bitcoin.core.Sha256Hash;
 import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.Utils;
 import com.google.bitcoin.core.Wallet.SendRequest;
+
 import org.bitcoinj.wallet.Protos.Wallet.EncryptionType;
 import org.multibit.MultiBit;
 import org.multibit.controller.Controller;
@@ -27,6 +28,7 @@ import org.multibit.exchange.CurrencyConverter;
 import org.multibit.model.bitcoin.BitcoinModel;
 import org.multibit.model.bitcoin.WalletBusyListener;
 import org.multibit.utils.ImageLoader;
+import org.multibit.viewsystem.dataproviders.BitcoinFormDataProvider;
 import org.multibit.viewsystem.swing.ColorAndFontConstants;
 import org.multibit.viewsystem.swing.MultiBitFrame;
 import org.multibit.viewsystem.swing.action.CancelBackToParentAction;
@@ -40,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+
 import java.awt.*;
 
 /**
@@ -85,6 +88,7 @@ public class SendBitcoinConfirmPanel extends JPanel implements WalletBusyListene
     private static ImageIcon shapeHeptagonIcon;
     private static ImageIcon shapeHexagonIcon;
     private static ImageIcon progress0Icon;
+    private BitcoinFormDataProvider dataProvider = null;
 
     static {
         shapeTriangleIcon = ImageLoader.createImageIcon(ImageLoader.SHAPE_TRIANGLE_ICON_FILE);
@@ -115,7 +119,28 @@ public class SendBitcoinConfirmPanel extends JPanel implements WalletBusyListene
         this.bitcoinController.registerWalletBusyListener(this);
     }
 
-    /**
+    public SendBitcoinConfirmPanel(BitcoinController bitcoinController, MultiBitFrame mainFrame, MultiBitDialog sendBitcoinConfirmDialog, SendRequest sendRequest, BitcoinFormDataProvider dataProvider) {
+		// TODO Auto-generated constructor stub
+    	 super();
+         this.bitcoinController = bitcoinController;
+         this.controller = this.bitcoinController;
+         this.mainFrame = mainFrame;
+         this.sendBitcoinConfirmDialog = sendBitcoinConfirmDialog;
+         this.sendRequest = sendRequest;
+         this.dataProvider = dataProvider; 
+
+         thisPanel = this;
+
+         initUI();
+
+         cancelButton.requestFocusInWindow();
+         applyComponentOrientation(ComponentOrientation.getOrientation(controller.getLocaliser().getLocale()));
+
+         this.bitcoinController.registerWalletBusyListener(this);
+    	
+	}
+
+	/**
      * Initialise bitcoin confirm panel.
      */
     public void initUI() {
@@ -136,10 +161,17 @@ public class SendBitcoinConfirmPanel extends JPanel implements WalletBusyListene
 
         // Get the data out of the wallet preferences.
         sendAddress = this.bitcoinController.getModel().getActiveWalletPreference(BitcoinModel.SEND_ADDRESS);
-        sendLabel = this.bitcoinController.getModel().getActiveWalletPreference(BitcoinModel.SEND_LABEL);
+        sendLabel =  this.bitcoinController.getModel().getActiveWalletPreference(BitcoinModel.SEND_LABEL);
         String sendAmount = this.bitcoinController.getModel().getActiveWalletPreference(BitcoinModel.SEND_AMOUNT) + " " + controller.getLocaliser(). getString("sendBitcoinPanel.amountUnitLabel");
 
-        String sendAmountLocalised = CurrencyConverter.INSTANCE.prettyPrint(sendAmount);
+        String sendAmountLocalised;
+        if(dataProvider != null && !dataProvider.isBTC()) {
+        	sendLabel = "";
+        	sendAmount = this.bitcoinController.getModel().getActiveWalletPreference(BitcoinModel.SEND_AMOUNT) + " " + dataProvider.getColorAsset().symbol;
+        	sendAmountLocalised = sendAmount;
+        }
+        else
+        	sendAmountLocalised = CurrencyConverter.INSTANCE.prettyPrint(sendAmount);
 
         String fee = "0";
         if (sendRequest != null) {

@@ -14,6 +14,8 @@ import java.util.List;
 import javax.sql.rowset.serial.SerialBlob;
 
 import org.multibit.ApplicationDataDirectoryLocator;
+import org.multibit.message.Message;
+import org.multibit.message.MessageManager;
 
 import com.google.bitcoin.store.BlockStoreException;
 // TODO: add db update proceduers and version
@@ -80,8 +82,13 @@ public class BaseStore {
 	            conn.set(DriverManager.getConnection(connectionURL));
 	            allConnections.add(conn.get());
 	            System.out.println("Made a new connection to database " + connectionURL);
+	            Message message = new Message("Connected to local db", 100);
+	            MessageManager.INSTANCE.addMessage(message);
 	        } catch (SQLException ex) {
+	            Message message = new Message(ex.getMessage(), 100);
+	            MessageManager.INSTANCE.addMessage(message);
 	            throw new SQLException(ex);
+
 	        }
 	    }
 	  

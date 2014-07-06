@@ -466,7 +466,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 				if(t.isMine( wallet.getWallet()) && !t.isEveryOwnedOutputSpent(wallet.getWallet()) && it.getPool() == Pool.UNSPENT) {
 					List<TransactionOutput> outputs = t.getOutputs();
 					for(int i = 0; i < outputs.size(); i++) {
-						if(outputs.get(i).isAvailableForSpending() && outputs.get(i).getValue().compareTo(BigInteger.ZERO) > 0) {
+						if(outputs.get(i).isAvailableForSpending() && outputs.get(i).isMine(wallet.getWallet()) &&outputs.get(i).getValue().compareTo(BigInteger.ZERO) > 0) {
 							ColorGenisis cg = bt.GetColorTransactionSearchHistory(wallet.getWallet(), t.getHashAsString(), i);
 							if(cg == null){
 								double change = outputs.get(i).getValue().doubleValue() - Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.doubleValue();

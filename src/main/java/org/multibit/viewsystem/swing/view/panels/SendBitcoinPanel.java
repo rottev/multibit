@@ -18,6 +18,10 @@ package org.multibit.viewsystem.swing.view.panels;
 import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.Utils;
+
+import etx.com.trading.BaseTrading;
+import etx.com.trading.BaseTrading.Asset;
+
 import org.multibit.controller.bitcoin.BitcoinController;
 import org.multibit.exchange.CurrencyConverter;
 import org.multibit.exchange.CurrencyConverterResult;
@@ -37,6 +41,7 @@ import org.multibit.viewsystem.swing.view.models.AddressBookTableModel;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 
 public class SendBitcoinPanel extends AbstractTradePanel implements Viewable {
@@ -513,6 +518,7 @@ public class SendBitcoinPanel extends AbstractTradePanel implements Viewable {
       titleLabel.setToolTipText(null);
     }
     checkDeleteSendingEnabled();
+    updateAmountPanel();
   }
 
   @Override
@@ -538,4 +544,18 @@ public class SendBitcoinPanel extends AbstractTradePanel implements Viewable {
   public SendBitcoinConfirmAction getSendBitcoinConfirmAction() {
     return sendBitcoinConfirmAction;
   }
+
+	@Override
+	public boolean isBTC() {
+		// TODO Auto-generated method stub
+		return selectAssetCB.getSelectedIndex() == 0;
+	}
+	
+	@Override
+	public Asset getColorAsset() {
+		// TODO Auto-generated method stub
+		if(isBTC()) return null;
+		String symbolName = (String)selectAssetCB.getSelectedItem();
+		return BaseTrading.getInstance().getAssetBySymbol(symbolName);
+	}
 }

@@ -1,5 +1,7 @@
 package org.multibit.viewsystem.dataproviders;
 
+import etx.com.trading.BaseTrading.Asset;
+
 
 /**
  * DataProvider for send bitcoin and send bitcoin confirm action
@@ -26,4 +28,8 @@ public interface BitcoinFormDataProvider extends DataProvider {
      * Get the amount (denominated in fiat)
      */
     public String getAmountFiat();
+    
+    public boolean isBTC();
+    
+    public Asset getColorAsset();
 }

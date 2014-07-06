@@ -18,6 +18,9 @@ package org.multibit.viewsystem.swing.view.panels;
 import com.google.bitcoin.core.Address;
 import com.google.bitcoin.uri.BitcoinURI;
 import com.google.bitcoin.uri.BitcoinURIParseException;
+
+import etx.com.trading.ColorProperty;
+
 import org.joda.money.Money;
 import org.multibit.controller.Controller;
 import org.multibit.controller.bitcoin.BitcoinController;
@@ -55,6 +58,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -176,6 +180,7 @@ public abstract class AbstractTradePanel extends JPanel implements Viewable, Cop
     protected String ADDRESSES_TITLE = "addressesTitle";
     protected String CREATE_NEW_TOOLTIP = "createNewTooltip";
     protected String DELETE_TOOLTIP = "deleteTooltip";
+    protected JComboBox selectAssetCB;
 
     public AbstractTradePanel(MultiBitFrame mainFrame, BitcoinController bitcoinController) {
         this.mainFrame = mainFrame;
@@ -1077,6 +1082,21 @@ public abstract class AbstractTradePanel extends JPanel implements Viewable, Cop
         buttonPanel.add(forcerQR, constraints2);
     }
 
+    protected void updateAmountPanel() {
+    	String activeWallet = ((BitcoinController) controller).getModel().getActiveWalletFilename();
+		final WalletData wdata = ((BitcoinController) controller).getModel().getPerWalletModelDataByWalletFilename(activeWallet);
+		String[] colors = wdata == null ? null : ColorProperty.deserlizie(wdata.getWalletInfo().getProperty(ColorProperty.propertyName));
+		
+    	//selectAssetCB.addItem("Please Select a color");
+		selectAssetCB.removeAllItems();
+    	selectAssetCB.addItem("BTC");
+        if(wdata != null && colors != null)
+        {
+        	for(String color : colors)
+        		selectAssetCB.addItem(color);
+        }
+    }
+    
     protected JPanel createAmountPanel() {
         JPanel amountPanel = new JPanel();
         amountPanel.setOpaque(false);
@@ -1119,9 +1139,42 @@ public abstract class AbstractTradePanel extends JPanel implements Viewable, Cop
         constraints2.anchor = GridBagConstraints.CENTER;
         amountPanel.add(MultiBitTitledPanel.createStent(3), constraints2);
 
-        MultiBitLabel amountUnitBTCLabel = new MultiBitLabel(controller.getLocaliser().getString("sendBitcoinPanel.amountUnitLabel"));
-        amountUnitBTCLabel.setHorizontalTextPosition(SwingConstants.LEADING);
-        amountUnitBTCLabel.setToolTipText(HelpContentsPanel.createTooltipText(controller.getLocaliser().getString("sendBitcoinPanel.amountUnitLabel.tooltip")));
+        //MultiBitLabel amountUnitBTCLabel = new MultiBitLabel(controller.getLocaliser().getString("sendBitcoinPanel.amountUnitLabel"));
+        //amountUnitBTCLabel.setHorizontalTextPosition(SwingConstants.LEADING);
+        //amountUnitBTCLabel.setToolTipText(HelpContentsPanel.createTooltipText(controller.getLocaliser().getString("sendBitcoinPanel.amountUnitLabel.tooltip")));
+        selectAssetCB =new JComboBox();
+        String activeWallet = ((BitcoinController) controller).getModel().getActiveWalletFilename();
+		final WalletData wdata = ((BitcoinController) controller).getModel().getPerWalletModelDataByWalletFilename(activeWallet);
+		String[] colors = wdata == null ? null : ColorProperty.deserlizie(wdata.getWalletInfo().getProperty(ColorProperty.propertyName));
+		
+    	//selectAssetCB.addItem("Please Select a color");
+    	selectAssetCB.addItem("BTC");
+        if(wdata != null && colors != null)
+        {
+        	for(String color : colors)
+        		selectAssetCB.addItem(color);
+        }
+        
+        selectAssetCB.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+			
+				amountEqualsLabel.setVisible(selectAssetCB.getSelectedIndex() == 0);
+				amountFiatTextField.setVisible(selectAssetCB.getSelectedIndex() == 0);
+				amountUnitFiatLabel.setVisible(selectAssetCB.getSelectedIndex() == 0);
+				
+				if(selectAssetCB.getSelectedIndex() != 0)
+				{
+					
+				}
+				else {
+
+				}
+				
+			}
+		});
+        
         constraints2.fill = GridBagConstraints.NONE;
         constraints2.gridx = 2;
         constraints2.gridy = 0;
@@ -1130,7 +1183,7 @@ public abstract class AbstractTradePanel extends JPanel implements Viewable, Cop
         constraints2.gridwidth = 1;
         constraints2.gridheight = 1;
         constraints2.anchor = GridBagConstraints.CENTER;
-        amountPanel.add(amountUnitBTCLabel, constraints2);
+        amountPanel.add(selectAssetCB, constraints2);
 
         amountEqualsLabel = new MultiBitLabel("   =   "); // 3 spaces either side
         amountEqualsLabel.setHorizontalTextPosition(SwingConstants.CENTER);

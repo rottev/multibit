@@ -47,6 +47,8 @@ import org.multibit.viewsystem.swing.view.components.MultiBitDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import etx.com.trading.BaseTrading.Asset;
+
 /**
  * The show open uri view.
  */
@@ -318,4 +320,16 @@ public class ShowOpenUriDialog extends MultiBitDialog implements Viewable, ShowU
         // TODO Auto-generated method stub
         return null;
     }
+
+	@Override
+	public boolean isBTC() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Asset getColorAsset() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
