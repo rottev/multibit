@@ -557,7 +557,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 									BigInteger backToWallet = totalgive.subtract(new BigDecimal(Double.parseDouble(pinfo.takeQuantity) / a.satoshi_multiplyier).toBigInteger());
 									if(backToWallet.doubleValue() > 0) {
 										tx.addOutput(backToWallet,outputs.get(i).getScriptPubKey().getToAddress(from.getNetworkParameters()));
-										tx.getInput(tx.getInputs().size() - 1).setSequenceNumber((tx.getInputs().size() -1) | Integer.MIN_VALUE);
+										tx.getInput(tx.getInputs().size() - 1).setSequenceNumber((tx.getOutputs().size() -1) | Integer.MIN_VALUE);
 									}
 									// since were color lets add the sequence for color
 									//AddColorToTx(tx, alInputs ,alOuputs);

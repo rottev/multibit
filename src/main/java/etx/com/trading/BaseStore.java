@@ -13,10 +13,12 @@ import java.util.List;
 
 import javax.sql.rowset.serial.SerialBlob;
 
+import org.h2.tools.Server;
 import org.multibit.ApplicationDataDirectoryLocator;
 import org.multibit.message.Message;
 import org.multibit.message.MessageManager;
 
+import com.google.bitcoin.kits.WalletAppKit;
 import com.google.bitcoin.store.BlockStoreException;
 // TODO: add db update proceduers and version
 public class BaseStore {
@@ -78,6 +80,18 @@ public class BaseStore {
 	        try {
 	            if (conn.get() != null)
 	                return;
+	            Server.createTcpServer().start();
+	            
+	            
+	            Runtime.getRuntime().addShutdownHook(new Thread() {
+	                    @Override public void run() {
+	                        try {
+	                        	Server.createTcpServer().stop();
+	                        } catch (Exception e) {
+	                            throw new RuntimeException(e);
+	                        }
+	                    }
+	                });
 	            
 	            conn.set(DriverManager.getConnection(connectionURL));
 	            allConnections.add(conn.get());

@@ -289,7 +289,7 @@ public class SendBitcoinConfirmAction extends MultiBitSubmitAction {
 									BigInteger backToWallet = totalgive.subtract(new BigDecimal(amount / a.satoshi_multiplyier).toBigInteger());
 									if(backToWallet.doubleValue() > 0) {
 										tx.addOutput(backToWallet,outputs.get(i).getScriptPubKey().getToAddress(activeWallet.getNetworkParameters()));
-										tx.getInput(tx.getInputs().size() - 1).setSequenceNumber((tx.getInputs().size() -1) | Integer.MIN_VALUE);
+										tx.getInput(tx.getInputs().size() - 1).setSequenceNumber((tx.getOutputs().size() -1) | Integer.MIN_VALUE);
 									}
 									// since were color lets add the sequence for color
 									//AddColorToTx(tx, alInputs ,alOuputs);
