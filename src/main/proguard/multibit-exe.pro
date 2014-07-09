@@ -130,6 +130,11 @@
  *;
 }
 
+-keep class etx.com.**
+{
+ *;
+}
+
 -keep public class org.slf4j.**
 -keep class org.slf4j.**
 
