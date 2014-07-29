@@ -135,7 +135,7 @@ public class TradeingPanel extends JPanel implements Viewable, FufilEventListene
 			e1.printStackTrace();
 		}
 		
-		 BaseTrading.getInstance().AddFufilmentEventListener(this);
+		 BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet()).AddFufilmentEventListener(this);
 		
 		// TODO Auto-generated constructor stub
 		GridBagLayout gridLayout = new GridBagLayout();
@@ -153,7 +153,7 @@ public class TradeingPanel extends JPanel implements Viewable, FufilEventListene
 		this.setLayout(gridLayout);
 		JScrollPane scrollPane_1 = new JScrollPane();
 		add(scrollPane_1, c);
-		tableAssets.setModel(new BaseAssetModel());		
+		tableAssets.setModel(new BaseAssetModel(((BitcoinController) controller).getModel().isTestnet()));		
 		scrollPane_1.setViewportView(tableAssets);
 		
 		//set table selection
@@ -232,7 +232,7 @@ public class TradeingPanel extends JPanel implements Viewable, FufilEventListene
 						 wlist.add(wdata);
 						 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 						 ReplayTask replayTask = null;
-						 Map<String, Issuance> isuuancesMap  = BaseTrading.getInstance().getIssuane(a.id);
+						 Map<String, Issuance> isuuancesMap  = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet()).getIssuane(a.id);
 						 //for now just use the first issuance instace for replay
 						 String firstKey=null;
 						 int firstIndex = 0;
@@ -277,7 +277,7 @@ public class TradeingPanel extends JPanel implements Viewable, FufilEventListene
 		// setup asset table
 		JScrollPane scrollPane2 = new JScrollPane();
 		add(scrollPane2, c);
-		tableTrades.setModel(new BaseTradesModel());		
+		tableTrades.setModel(new BaseTradesModel(((BitcoinController) controller).getModel().isTestnet()));		
 		scrollPane2.setViewportView(tableTrades);
 		
 		
@@ -629,7 +629,7 @@ public class TradeingPanel extends JPanel implements Viewable, FufilEventListene
 	
 	public void refreshIssueance()
 	{
-		BaseTrading.getInstance().getIssuane(true);
+		BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet()).getIssuane(true);
 	}
 
 }

@@ -689,7 +689,7 @@ public class SingleWalletPanel extends JPanel implements ActionListener, FocusLi
     //etx
     try
     {
-    BaseTrading bt = BaseTrading.getInstance();
+    BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
    // LinkedList<TransactionOutput> all = perWalletModelData.getWallet().calculateAllSpendCandidates(false);
   //  System.out.println("transactions count: " + all.size());
     BigInteger value = BigInteger.ZERO;

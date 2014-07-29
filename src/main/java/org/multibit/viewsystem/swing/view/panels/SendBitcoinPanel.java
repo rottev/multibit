@@ -556,6 +556,6 @@ public class SendBitcoinPanel extends AbstractTradePanel implements Viewable {
 		// TODO Auto-generated method stub
 		if(isBTC()) return null;
 		String symbolName = (String)selectAssetCB.getSelectedItem();
-		return BaseTrading.getInstance().getAssetBySymbol(symbolName);
+		return BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet()).getAssetBySymbol(symbolName);
 	}
 }

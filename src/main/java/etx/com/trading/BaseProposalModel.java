@@ -12,11 +12,12 @@ import etx.com.trading.BaseTrading.Proposal;
 
 public class BaseProposalModel extends AbstractTableModel {
 	
-	private BaseTrading model = BaseTrading.getInstance();
+	private BaseTrading model;
 	private List<Proposal> dataSource = null;
 	
-	public BaseProposalModel()
+	public BaseProposalModel(boolean isTestnet)
 	{
+		model = BaseTrading.getInstance(isTestnet);
 		/*
 		Executors.newSingleThreadExecutor().execute(new Runnable() {
 			@Override

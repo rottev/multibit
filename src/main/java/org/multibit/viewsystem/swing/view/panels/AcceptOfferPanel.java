@@ -297,7 +297,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 	    
         acceptOfferButton.addActionListener(new ActionListener() {
 			
-			private BaseTrading bt = BaseTrading.getInstance();
+			private BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 			
 
 			@Override
@@ -458,7 +458,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 		{
 		for( WalletData wallet : ((BitcoinController) controller).getModel().getPerWalletModelDataList())
 		{
-			BaseTrading bt = BaseTrading.getInstance();
+			BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 			
 			
 			for (WalletTransaction it : wallet.getWallet().getWalletTransactions()) {
@@ -508,7 +508,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 		{
 		//	List<Integer> alInputs = new ArrayList<Integer>();
 		//	List<Integer> alOuputs = new ArrayList<Integer>();
-			BaseTrading bt = BaseTrading.getInstance();
+			BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 
 			for (WalletTransaction it : from.getWalletTransactions() ) {
 				Transaction t = it.getTransaction();
@@ -674,7 +674,7 @@ public class AcceptOfferPanel extends JPanel implements Viewable {
 		try
 		{
 			BigInteger totalValue = BigInteger.ZERO;
-			BaseTrading bt = BaseTrading.getInstance();
+			BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 			WalletData recivewdata = ((BitcoinController) controller).getModel().getPerWalletModelDataByWalletFilename(
 					(String)reciveWalletCB.getItemAt(reciveWalletCB.getSelectedIndex()));
 			Address to = recivewdata.getWallet().getKeys().get(0).toAddress(recivewdata.getWallet().getNetworkParameters());

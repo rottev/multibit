@@ -11,14 +11,15 @@ import etx.com.trading.BaseTrading.Asset;
 
 public class BaseAssetModel extends AbstractTableModel {
 	
-	private BaseTrading model = BaseTrading.getInstance();
+	private BaseTrading model;
 	private List<Asset> dataSource = null;
 
      
 
 
-	public BaseAssetModel()
+	public BaseAssetModel(boolean isTestnet)
 	{
+		model = BaseTrading.getInstance(isTestnet);
 		Executors.newSingleThreadExecutor().execute(new Runnable() {
 			@Override
 			  public void run() {

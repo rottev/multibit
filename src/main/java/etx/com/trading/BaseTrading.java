@@ -77,11 +77,18 @@ public class BaseTrading {
 	private static List<Proposal> proposals = new ArrayList<Proposal>();
 	private static List<Fufilment> fufillments = new ArrayList<Fufilment>();
 	private static List<FufilEventListener> fuflemntEventListeners = new ArrayList<FufilEventListener>();
-	public static int JSON_RPC_PORT = 6712;
-	
+	public static int JSON_RPC_PORT = 6710;
+	private static String baseIssueServerUrl = "http://lb1.colorcoins.na.tl/";
+	//private static String baseIssueServerUrl = "http://localhost:8080/";
+	private boolean isTestnet;
 	public static enum ColoringMode {
 		MODE_ORDER_BASED,
 		MODE_SEQUENCE_NUMBER
+	}
+	
+	private String getIssueanceServerUrl(String resource)
+	{
+		return  baseIssueServerUrl + (isTestnet ? "testnet/" : "" ) + resource;
 	}
 	//private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	/*
@@ -101,7 +108,7 @@ public class BaseTrading {
 	}
 	
 	
-	private static BaseTrading instance = null;
+	protected static BaseTrading instance = null;
 	
 	public static class MsgSend
 	{
@@ -114,14 +121,16 @@ public class BaseTrading {
 		public String subject;
 		public String body;
 		public String fromaddress;
+		public String id;
 	}
 	
 	private JsonRpcHttpClient client;
 	
 	
-	private BaseTrading()
+	private BaseTrading(boolean isTestnet)
 	{
 		synchronized (lock) {
+			this.isTestnet = isTestnet;
 			assetsList = fetchAssetList();
 			issuancesList = fetchIssuane();
 		}
@@ -130,11 +139,11 @@ public class BaseTrading {
 	
 
 	
-	public static BaseTrading getInstance() {
+	public static BaseTrading getInstance(boolean isTestnet) {
 		 if(instance == null) {
 		     synchronized(BaseTrading.class) {
 		       if(instance == null) {
-		    	   instance = new BaseTrading();
+		    	   instance = new BaseTrading(isTestnet);
 		       }
 		    }
 		  }
@@ -157,6 +166,7 @@ public class BaseTrading {
 		public List<String> utxos;
 		public List<String> utxosIndexes;
 		public Sha256Hash hash = null;
+		public boolean isTestnet = false;
 		
 
 		public static ProposalInfo parse(Proposal in) {
@@ -170,6 +180,7 @@ public class BaseTrading {
 			p.giveQuantity = in.data[2];
 			p.takeQuantity = in.data[4];
 			p.takeAddress = in.data[5];
+			
 			p.utxos = new ArrayList<String>();
 			p.utxosIndexes = new ArrayList<String>();
 			
@@ -177,8 +188,10 @@ public class BaseTrading {
 			 for(JsonElement o : utxosArray)
 			 {
 				 p.utxos.add(o.getAsJsonArray().get(0).getAsString());
-				 p.utxosIndexes.add(o.getAsJsonArray().get(1).getAsString());
+				 p.utxosIndexes.add(o.getAsJsonArray().get(1).getAsString());				  
 			 }
+			 p.isTestnet = (p.utxos.get(0).startsWith("m") || p.utxos.get(0).startsWith("n"));
+			 
 			 p.hash = Sha256Hash.create(in.raw.toString().getBytes(Charset.forName("UTF-8")));
 
 			
@@ -218,6 +231,7 @@ public class BaseTrading {
 		public String id;
 		public JsonObject raw;
 		private Sha256Hash hash = null;
+		public boolean isTestnet;
 		
 		public Proposal(String data)
 		{
@@ -237,6 +251,11 @@ public class BaseTrading {
 
 		public String getColumnByInedx(int index) {
 			// TODO Auto-generated method stub
+			if(index == 1)
+				return data[6];
+			else if (index == 3)
+				return data[7];
+			else
 				return data[index];
 		}
 		
@@ -257,9 +276,11 @@ public class BaseTrading {
 				 String assestre = o.get("take").getAsJsonObject().get("asset").getAsString();
 				 String ratio = o.get("take").getAsJsonObject().get("quantity").toString();
 				 String toaddress =  o.get("take").getAsJsonObject().get("address").getAsString();
-
+				 String assetName = instance.getAssetNameById(asset);
+				 String assetRequestName = instance.getAssetNameById(assestre);
+				 p.isTestnet = (toaddress.startsWith("m") || toaddress.startsWith("n"));
 				 
-				 p.data = new String[] {Scheme, asset, quantity, assestre, ratio, toaddress };
+				 p.data = new String[] {Scheme, asset, quantity, assestre, ratio, toaddress, assetName, assetRequestName };
 				 p.id = UUID.randomUUID().toString();
 				 p.raw = o;
 			 }
@@ -387,6 +408,7 @@ public class BaseTrading {
 		public double satoshi_multiplyier;
 		public String first_issuance_date;
 		public boolean trusted;
+		public String creator;
 		
 		public int getColumnCount()
 		{
@@ -405,6 +427,8 @@ public class BaseTrading {
 				return symbol;
 			case 3:
 				return Double.toString(satoshi_multiplyier);
+			case 4:
+				return creator;
 			default:
 				return null;
 			}
@@ -412,7 +436,7 @@ public class BaseTrading {
 		
 		public String[] getColumnNames()
 		{
-			return new String[] {"Asset Name", "Asset Key", "Asset Symbol", "Signle Satoshi Multiplyer"};
+			return new String[] {"Asset Name", "Asset Key", "Asset Symbol", "Signle Satoshi Multiplyer", "Creator"};
 		}
 		
 		
@@ -460,18 +484,36 @@ public class BaseTrading {
 		return null;
 	}
 	
+	public String getAssetNameById(String id)
+	{
+
+		if(id.equals("BTC")) return id;
+		
+		synchronized (lock) {
+			for(Asset a : assetsList)
+			{
+				if(a.id.equals(id))
+					return a.name;
+			}
+		}		
+		return "Unknown";
+	}
 	
 	
 	private List<Asset> fetchAssetList()  {
 		
 		List<Asset> result = null;
 		try {
-			result = Request.Get("http://lb1.colorcoins.na.tl/asset"/*"https://dl.dropboxusercontent.com/u/13369450/assets.json" */)
+			result = Request.Get(getIssueanceServerUrl("asset"))
 			        .execute().handleResponse(new ResponseHandler<List<Asset>>() {
 
 						@Override
 						public List<Asset> handleResponse(HttpResponse response)
 								throws ClientProtocolException, IOException {
+							
+							if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) 
+								return new ArrayList<Asset>();
+							
 							// TODO Auto-generated method stub
 							BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 							List<Asset> assets = new ArrayList<Asset>();
@@ -481,7 +523,7 @@ public class BaseTrading {
 							while ((line = rd.readLine()) != null) {
 							    result.append(line);
 							}
-
+							
 								Asset[] json =  new Gson().fromJson(result.toString(),Asset[].class);
 								//Map<String, String> map = new Gson().fromJson(result.toString(), new TypeToken<Map<String, String>>() {}.getType());
 								//System.out.println(map.get("name"));
@@ -553,13 +595,16 @@ public class BaseTrading {
 	public Map<String, Issuance> fetchIssuane(){
 		Map<String, Issuance> result = null;
 		try {
-			result = Request.Get("http://lb1.colorcoins.na.tl/issue"/*"https://dl.dropboxusercontent.com/u/13369450/issuance.json"*/)
+			result = Request.Get(getIssueanceServerUrl("issue"))
 			        .execute().handleResponse(new ResponseHandler<Map<String,Issuance>>() {
 
 						@Override
 						public Map<String,Issuance> handleResponse(HttpResponse response)
 								throws ClientProtocolException, IOException {
 							// TODO Auto-generated method stub
+							if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) 
+								return new HashMap<String,Issuance>();
+							
 							BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
 							StringBuffer result = new StringBuffer();
@@ -816,8 +861,10 @@ public class BaseTrading {
 				  if(msg.subject.equals("proposal"))
 				  {
 					  Proposal p = Proposal.parse(msg.body);
-					  if(!proposals.contains(p) && p != null)
-						  proposals.add(p);
+					  if(!proposals.contains(p) && p != null) {
+						  if(isTestnet == p.isTestnet)
+							  proposals.add(p);
+					  }
 				  }
 				  else if(msg.subject.equals("fulfil")){
 					  Fufilment f = Fufilment.parse(msg.body);
@@ -990,7 +1037,7 @@ public class BaseTrading {
 		String a = null;
 		try {
 
-			a = Request.Post("http://lb1.colorcoins.na.tl/asset").bodyString(new Gson().toJson(asset, Asset.class), ContentType.APPLICATION_JSON )
+			a = Request.Post(getIssueanceServerUrl("asset")).bodyString(new Gson().toJson(asset, Asset.class), ContentType.APPLICATION_JSON )
 			        .execute().handleResponse(new ResponseHandler<String>() {
 
 						@Override
@@ -1140,7 +1187,7 @@ public class BaseTrading {
 			is.outputindex = outIndex;
 		
 
-			ret = Request.Post("http://lb1.colorcoins.na.tl/issue/" + key).bodyString(new Gson().toJson(is, Issuance.class), ContentType.APPLICATION_JSON )
+			ret = Request.Post(getIssueanceServerUrl("issue/" + key) ).bodyString(new Gson().toJson(is, Issuance.class), ContentType.APPLICATION_JSON )
 			        .execute().handleResponse(new ResponseHandler<Boolean>() {
 
 						@Override

@@ -527,7 +527,7 @@ public class IssueAssetPanel extends JPanel implements Viewable {
 	    
         issueAssetButton.addActionListener(new ActionListener() {
 			
-			private BaseTrading bt = BaseTrading.getInstance();
+			private BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 			boolean closeWindow = false;
 
 			@Override

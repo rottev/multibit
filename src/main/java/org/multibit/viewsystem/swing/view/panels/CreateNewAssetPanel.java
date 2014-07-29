@@ -132,10 +132,12 @@ public class CreateNewAssetPanel extends JPanel implements Viewable {
     private MultiBitLabel assetMultipLabel;
     private JTextPane  assetKeyLabel;
     private MultiBitLabel assetKeyInfoLabel;
+    private MultiBitLabel assetCreatorNameLabel;
     
     private JFormattedTextField assetName =  null;
     private JFormattedTextField assetSymbol =  null;
     private JFormattedTextField assetMultip =  null;
+    private JFormattedTextField creatorName =  null;
     
     private static final byte[] EMPTY_BYTES = new byte[32];
 
@@ -154,6 +156,7 @@ public class CreateNewAssetPanel extends JPanel implements Viewable {
 		f.setMaximumIntegerDigits(10);
 		assetName =  new JFormattedTextField();
 		assetSymbol = new JFormattedTextField();
+		creatorName = new JFormattedTextField();
 	    assetMultip = new JFormattedTextField(f);
 		
 	  //  assetName.
@@ -250,6 +253,23 @@ public class CreateNewAssetPanel extends JPanel implements Viewable {
         
         
         constraints.gridx = 0;
+        constraints.gridy = 3;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.weightx = 0.0;
+        assetCreatorNameLabel  = new MultiBitLabel(controller.getLocaliser().getString(
+                "CreateAssetPanel.creatorName"));
+        panel.add(assetCreatorNameLabel, constraints);
+        
+        constraints.gridx = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weightx = 0.7;
+
+        panel.add(creatorName, constraints);
+        
+        //
+        
+        
+        constraints.gridx = 0;
         constraints.gridy = 4;
        // constraints.fill = GridBagConstraints.BOTH;
         constraints.gridwidth = GridBagConstraints.REMAINDER;
@@ -263,6 +283,9 @@ public class CreateNewAssetPanel extends JPanel implements Viewable {
         
         panel.add(assetKeyLabel, constraints);
       
+        
+        
+        
         
         // add buttons
         JPanel buttonsPanel = new JPanel(new GridBagLayout());
@@ -285,7 +308,7 @@ public class CreateNewAssetPanel extends JPanel implements Viewable {
 	    
         createAssetButton.addActionListener(new ActionListener() {
 			
-			private BaseTrading bt = BaseTrading.getInstance();
+			private BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 			boolean closeWindow = false;
 
 			@Override
@@ -296,7 +319,7 @@ public class CreateNewAssetPanel extends JPanel implements Viewable {
 				try
 				{
 					final String key = Sha256Hash.create(assetName.getText().getBytes()).toString();
-					String assetKey = bt.createNewUntrustedAsset(new Asset(){{ name= assetName.getText(); symbol = assetSymbol.getText(); satoshi_multiplyier = Double.parseDouble(assetMultip.getText()); id= key; }});
+					String assetKey = bt.createNewUntrustedAsset(new Asset(){{ name= assetName.getText(); symbol = assetSymbol.getText(); satoshi_multiplyier = Double.parseDouble(assetMultip.getText()); id= key; creator= creatorName.getText(); }});
 					if(assetKey != null) {
 						assetKeyLabel.setText(controller.getLocaliser().getString(
 				                "CreateAssetPanel.key") +  assetKey);

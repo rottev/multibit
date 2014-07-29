@@ -16,7 +16,7 @@ import etx.com.trading.BaseTrading.Proposal;
 
 public class BaseTradesModel extends AbstractTableModel {
 	
-	private BaseTrading model = BaseTrading.getInstance();
+	private BaseTrading model;
 	private List<Proposal> dataSource = null;
 	private Object lock = new Object();
 	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -51,8 +51,9 @@ public class BaseTradesModel extends AbstractTableModel {
      
     private ScheduledFuture<?> handler;
 	
-	public BaseTradesModel()
+	public BaseTradesModel(boolean isTestnet)
 	{
+		 model = BaseTrading.getInstance(isTestnet);
 		Executors.newSingleThreadExecutor().execute(new Runnable() {
 			@Override
 			  public void run() {

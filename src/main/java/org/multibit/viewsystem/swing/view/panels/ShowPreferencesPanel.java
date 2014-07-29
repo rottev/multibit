@@ -1480,7 +1480,7 @@ public class ShowPreferencesPanel extends JPanel implements Viewable, Preference
     
     private JPanel createConfigurationSettingsPanel(int stentWidth) {
         MultiBitTitledPanel configurationSettingsPanel = new MultiBitTitledPanel(controller.getLocaliser().getString(
-                "showPreferencesPanel.browserIntegrationTitle"), ComponentOrientation.getOrientation(controller.getLocaliser()
+                "showPreferencesPanel.configurationSectionTitle"), ComponentOrientation.getOrientation(controller.getLocaliser()
                 .getLocale()));
 
         GridBagConstraints constraints = new GridBagConstraints();

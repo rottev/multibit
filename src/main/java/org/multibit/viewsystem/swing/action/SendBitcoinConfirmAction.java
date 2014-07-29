@@ -206,7 +206,7 @@ public class SendBitcoinConfirmAction extends MultiBitSubmitAction {
 		// TODO Auto-generated method stub
 		try
 		{
-			BaseTrading bt = BaseTrading.getInstance();
+			BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 			
 			
 			for (WalletTransaction it : activeWallet.getWalletTransactions()) {
@@ -255,7 +255,7 @@ public class SendBitcoinConfirmAction extends MultiBitSubmitAction {
 		{
 		//	List<Integer> alInputs = new ArrayList<Integer>();
 		//	List<Integer> alOuputs = new ArrayList<Integer>();
-			BaseTrading bt = BaseTrading.getInstance();
+			BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 
 			NumberFormat nf = NumberFormat.getInstance();
 			Double amount = nf.parse(sendAmount).doubleValue();

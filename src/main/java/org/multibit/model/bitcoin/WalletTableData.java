@@ -40,7 +40,7 @@ public class WalletTableData {
     private Transaction transaction;
     private WalletData wallet;
     
-    private static BaseTrading bt = BaseTrading.getInstance();
+    private static BaseTrading bt;
     
     /**
      * The height of the block this transaction appears in.
@@ -53,7 +53,8 @@ public class WalletTableData {
     private BigInteger debit;
     private BigInteger credit;
 
-    public WalletTableData(Transaction transaction, WalletData wallet) {
+    public WalletTableData(Transaction transaction, WalletData wallet, boolean isTestnet) {
+    	bt =  BaseTrading.getInstance(isTestnet);
         this.transaction = transaction;
         this.wallet = wallet;
     }

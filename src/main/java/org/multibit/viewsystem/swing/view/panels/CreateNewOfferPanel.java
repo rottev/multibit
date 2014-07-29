@@ -320,7 +320,7 @@ public class CreateNewOfferPanel extends JPanel implements Viewable {
 	    
         createOfferButton.addActionListener(new ActionListener() {
 			
-			private BaseTrading bt = BaseTrading.getInstance();
+			private BaseTrading bt = BaseTrading.getInstance(((BitcoinController) controller).getModel().isTestnet());
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {

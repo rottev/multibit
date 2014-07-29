@@ -433,7 +433,7 @@ public class BitcoinModel extends AbstractModel<CoreModel> {
             for (Transaction loopTransaction : transactions) {
             	if(!loopTransaction.isMine(perWalletModelData.getWallet()))
             		continue;
-                WalletTableData walletDataRow = new WalletTableData(loopTransaction, perWalletModelData);
+                WalletTableData walletDataRow = new WalletTableData(loopTransaction, perWalletModelData, isTestnet());
                 walletData.add(walletDataRow);
                 walletDataRow.setCredit(loopTransaction.getValueSentToMe(perWalletModelData.getWallet()));
                 try {
@@ -689,6 +689,19 @@ public class BitcoinModel extends AbstractModel<CoreModel> {
             }
         }
         return null;
+    }
+    
+    
+    public boolean isTestnet()
+    {
+    	 String testOrProduction = super.getUserPreference(BitcoinModel.TEST_OR_PRODUCTION_NETWORK);
+    	 if (BitcoinModel.TEST_NETWORK_VALUE.equalsIgnoreCase(testOrProduction)) {
+             return true;
+         } else if (BitcoinModel.TESTNET3_VALUE.equalsIgnoreCase(testOrProduction)) {
+             return true;
+         } else {
+             return false;
+         }
     }
     
     public NetworkParameters getNetworkParameters() {
