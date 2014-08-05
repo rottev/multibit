@@ -104,17 +104,17 @@
     </pack>
     <pack name="Messages" required="yes">
       <description>Messages server install files.</description>
-      <file src="../../bin/target/staging.windows/messages/message.exe" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/_bz2.pyd" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/_ctypes.pyd" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/_hashlib.pyd" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/_lzma.pyd" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/_socket.pyd" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/_ssl.pyd" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/pyexpat.pyd" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/python34.dll" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/select.pyd" targetdir="$INSTALL_PATH/Messages"/>
-		<file src="../../bin/target/staging.windows/messages/unicodedata.pyd" targetdir="$INSTALL_PATH/Messages"/>
+      	<file src="../../src/dependencies/windows/messages/message.exe" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/_bz2.pyd" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/_ctypes.pyd" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/_hashlib.pyd" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/_lzma.pyd" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/_socket.pyd" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/_ssl.pyd" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/pyexpat.pyd" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/python34.dll" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/select.pyd" targetdir="$INSTALL_PATH/Messages"/>
+		<file src="../../src/dependencies/windows/messages/unicodedata.pyd" targetdir="$INSTALL_PATH/Messages"/>
     </pack>
     
   </packs>
