@@ -54,6 +54,7 @@ public class Localiser {
     public static final String SEPARATOR = "_";
     public static final String PROPERTY_NAME_SUFFIX = ".properties";
     public static final String VERSION_PROPERTY_KEY_NAME = "version";
+    public static final String COLORED_VERSION_PROPERTY_KEY_NAME = "colorversion";
     public static final String VERSION_PROPERTIES_FILENAME = "/version.properties";
     public static final String LANGUAGE_PROPERTIES_FILENAME = MULTIBIT_RESOURCE_BUNDLE_DIRECTORY + "/language.properties";
 
@@ -249,6 +250,35 @@ public class Localiser {
 
         if (versionProperties != null) {
             version = versionProperties.getProperty(VERSION_PROPERTY_KEY_NAME);
+            if (version == null) {
+                version = "";
+            }
+        }
+        return version;
+    }
+    
+    
+    /**
+     * Get the version number specified in the version.properties file.
+     * 
+     * @return
+     */
+    public String getColoredVersionNumber() {
+        String version = "";
+        if (versionProperties == null) {
+            versionProperties = new Properties();
+            try {
+                java.net.URL versionPropertiesURL = Localiser.class.getResource(VERSION_PROPERTIES_FILENAME);
+                if (versionPropertiesURL != null) {
+                    versionProperties.load(versionPropertiesURL.openStream());
+                }
+            } catch (IOException ioe) {
+                log.error(ioe.getMessage(), ioe);
+            }
+        }
+
+        if (versionProperties != null) {
+            version = versionProperties.getProperty(COLORED_VERSION_PROPERTY_KEY_NAME);
             if (version == null) {
                 version = "";
             }

@@ -51,9 +51,13 @@ public class HelpAboutPanel extends JPanel implements Viewable {
         this.controller = controller;
 
         String versionNumber = controller.getLocaliser().getVersionNumber();
+        String colorVersionNumber = controller.getLocaliser().getColoredVersionNumber();
 
         String versionText = controller.getLocaliser().getString("helpAboutAction.versionText",
                 new Object[] { versionNumber });
+        
+        String colorVersionText = controller.getLocaliser().getString("helpAboutAction.colorVersionText",
+                new Object[] { colorVersionNumber });
 
         GridBagConstraints constraints = new GridBagConstraints();
         setLayout(new GridBagLayout());
@@ -105,6 +109,17 @@ public class HelpAboutPanel extends JPanel implements Viewable {
         constraints.fill = GridBagConstraints.NONE;
         constraints.gridx = 0;
         constraints.gridy = 4;
+        constraints.gridwidth = 1;
+        constraints.weightx = 1;
+        constraints.weighty = 0.1;
+        constraints.anchor = GridBagConstraints.CENTER;
+        MultiBitLabel colorCersionLabel = new MultiBitLabel(colorVersionText);
+        add(colorCersionLabel, constraints);
+        
+        
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.gridx = 0;
+        constraints.gridy = 5;
         constraints.gridwidth = 1;
         constraints.weightx = 1;
         constraints.weighty = 0.2;

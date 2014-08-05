@@ -81,6 +81,8 @@ public class BaseTrading {
 	private static String baseIssueServerUrl = "http://lb1.colorcoins.na.tl/";
 	//private static String baseIssueServerUrl = "http://localhost:8080/";
 	private boolean isTestnet;
+	private Launcher lanuncher = Launcher.getInstance();
+	
 	public static enum ColoringMode {
 		MODE_ORDER_BASED,
 		MODE_SEQUENCE_NUMBER
